@@ -8,6 +8,9 @@ import {TeaStain} from '../../props/Splash';
 import {Camera, Vignette} from '../ui';
 import {BIKE_DX, GROUND, HIP_REST, HIP_Y, alanAt, ip, smooth, CUP_REST, STAIN_X, CUP_GROUND_Y} from '../alan';
 
+/** Stop at rest: easing outside its unit interval would make surprise negative. */
+export const reactionSurpriseAt = (local: number): number => 0.95 * (1 - ip(local, [0, 1.15], [0, 1], smooth));
+
 /**
  * Reaction: the head snaps down to the basket, the shoulders tighten, one small
  * step back, then she lifts her eyes to the building above.
@@ -37,7 +40,7 @@ export const S02Reaction: React.FC<{start: number}> = ({start}) => {
     breathing: 0,
     breath: Math.sin(t * 1.6) * 0.9,
     ponytail: -3 + Math.sin(t * 2.4) * 2.4,
-    surprise: 0.95 * (1 - smooth(local / 1.15)),
+    surprise: reactionSurpriseAt(local),
     mood: -0.75,
   };
 

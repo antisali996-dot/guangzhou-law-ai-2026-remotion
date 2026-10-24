@@ -12,6 +12,19 @@ const {RIG} = require('../../src/characters/Rig.tsx');
 const {alanAt} = require('../../src/film/alan.ts');
 const {solveTwoBone} = require('../../src/lib/ik.ts');
 
+test('post-impact surprise settles at rest without driving brows into the eyes', () => {
+  const {reactionSurpriseAt} = require('../../src/film/scenes/S02Reaction.tsx');
+  let previous=0.95;
+  for(let frame=0;frame<140;frame++) {
+    const local=frame/60;
+    const surprise=reactionSurpriseAt(local);
+    assert.ok(surprise>=0 && surprise<=0.95, `expression overshoots at ${local}s: ${surprise}`);
+    assert.ok(surprise<=previous+1e-12, 'a settling reaction must not reverse direction');
+    if(local>=1.15) assert.equal(surprise,0);
+    previous=surprise;
+  }
+});
+
 test('new incident cameras cover every frame and keep the impact inside its close-up', () => {
   const {INCIDENT_SHOTS,shotAtFrame,SHOULDER_LOCAL} = require('../../src/film/cameraAngles.ts');
   const {T_CONTACT} = require('../../src/film/alan.ts');
