@@ -50,6 +50,7 @@ export type Pose = {
   ponytail?: number;
   /** 0 = calm, 1 = brief startle (raised brows, wider eyes, parted mouth) */
   surprise?: number;
+  blink?: number;
   /** -1 = worried / serious, 0 = neutral, +1 = warm smile. Default is a faint smile. */
   mood?: number;
 };
@@ -344,14 +345,15 @@ const Head: React.FC<{
   ponytail: number;
   surprise?: number;
   mood?: number;
-}> = ({yaw, nod, tilt, look, ponytail, surprise = 0, mood = 0.25}) => {
+  blink?: number;
+}> = ({yaw, nod, tilt, look, ponytail, surprise = 0, mood = 0.25, blink = 0}) => {
   const f = yaw * 6; // features slide with the head turn
   const squash = 1 - Math.abs(yaw) * 0.07;
   const m = nod * 0.08;
   const sx = surprise;
   const worry = Math.max(0, -mood);
   const smile = Math.max(0, mood);
-  const blinkLift = 0; // eyes stay open; blinks are not authored per shot
+  const eyeOpen = Math.max(0.04, 1 - Math.min(1, Math.max(0, blink)));
   return (
     <g transform={`rotate(${tilt}) translate(${yaw * 2} 0)`}>
       {/* neck: slim, lit from the front, shadow thrown by the jaw */}
@@ -385,8 +387,9 @@ const Head: React.FC<{
         <path d={`M ${-9 + f} ${-13.6 - 3 * sx + 0.8 * worry} q 4.6 ${-2.6 - 1.2 * worry} 9 ${0.2 - 3.6 * worry}`} stroke="#3A2D29" strokeWidth={1.7} fill="none" strokeLinecap="round" />
         <path d={`M ${6.4 + f} ${-14.2 - 3 * sx - 3 * worry} q 4.6 ${-2.2 + 1.4 * worry} 8.8 ${1.2 + 3 * worry}`} stroke="#3A2D29" strokeWidth={1.7} fill="none" strokeLinecap="round" />
         {/* eyes: small sclera, large dark iris tucked under the lid, one catch-light */}
-        <ellipse cx={-4.4 + f} cy={-3.2 + blinkLift} rx={4.1} ry={4.5 + 0.8 * sx} fill="#F7F2EA" />
-        <ellipse cx={10.6 + f} cy={-3.2 + blinkLift} rx={3.8} ry={4.4 + 0.8 * sx} fill="#F7F2EA" />
+        <g transform={`translate(0 -3.2) scale(1 ${eyeOpen}) translate(0 3.2)`}>
+        <ellipse cx={-4.4 + f} cy={-3.2} rx={4.1} ry={4.5 + 0.8 * sx} fill="#F7F2EA" />
+        <ellipse cx={10.6 + f} cy={-3.2} rx={3.8} ry={4.4 + 0.8 * sx} fill="#F7F2EA" />
         <circle cx={-3.6 + f} cy={-3.2} r={3} fill="#44302A" />
         <circle cx={11.3 + f} cy={-3.2} r={2.8} fill="#44302A" />
         <circle cx={-3.5 + f} cy={-3.2} r={1.7} fill="#15100E" />
@@ -398,6 +401,11 @@ const Head: React.FC<{
         <path d={`M ${7 + f} -4.2 q 4.3 -4.8 8.4 -0.2`} stroke="#2B221F" strokeWidth={1.5} fill="none" strokeLinecap="round" />
         <path d={`M ${-9 + f} -4.2 l -2 -1.2`} stroke="#2B221F" strokeWidth={1.2} strokeLinecap="round" fill="none" />
         <path d={`M ${15.4 + f} -4.4 l 1.8 -1.3`} stroke="#2B221F" strokeWidth={1.2} strokeLinecap="round" fill="none" />
+        </g>
+        <g opacity={blink} stroke="#2B221F" strokeWidth={1.4} strokeLinecap="round" fill="none">
+          <path d={`M ${-9+f} -3.2 q 4.6 1.1 9 0`} />
+          <path d={`M ${7+f} -3.2 q 4.3 1.1 8.4 0`} />
+        </g>
         {/* nose: a small shaded tip, no hook */}
         <path d={`M ${14.6 + f} 2.4 q 2.2 2.2 0.2 4.4`} stroke={look.skinShade} strokeWidth={1.3} fill="none" strokeLinecap="round" opacity={0.85} />
         {/* cheek colour, kept subtle */}
@@ -547,7 +555,7 @@ export const Actor: React.FC<{
         <g
           transform={`translate(${neckRoot.x} ${neckRoot.y}) rotate(${torsoDeg * 0.55 + (pose.headNod ?? 0) * 0.45 + (pose.headTilt ?? 0) * 0.5}) translate(0 ${headFromNeck})`}
         >
-          <Head yaw={yaw} nod={0} tilt={0} look={look} ponytail={pose.ponytail ?? 0} surprise={pose.surprise ?? 0} mood={pose.mood ?? 0.25} />
+          <Head yaw={yaw} nod={0} tilt={0} look={look} ponytail={pose.ponytail ?? 0} surprise={pose.surprise ?? 0} mood={pose.mood ?? 0.25} blink={pose.blink ?? 0} />
         </g>
 
         {/* near arm last, in front */}

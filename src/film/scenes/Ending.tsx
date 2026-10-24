@@ -10,6 +10,7 @@ import {TeaStain} from '../../props/Splash';
 import {Camera, EvidenceStill, EVIDENCE_FOCUS, HeldPhone, Vignette} from '../ui';
 import {BIKE_DX, GROUND, HIP_REST, HIP_Y, ip, smooth, CUP_REST, STAIN_X, CUP_GROUND_Y} from '../alan';
 import {standingLegs} from '../../characters/locomotion';
+import {blinkAt} from '../../lib/blink';
 import {leaveAt, LEAVE_BIKE_X, LEAVE_ACTOR_X} from '../leave';
 export {LEAVE} from '../leave';
 
@@ -53,7 +54,7 @@ const CctvStage: React.FC<{local: number; zoom: number}> = ({local, zoom}) => {
           top: 0,
           width: CAM_W,
           height: CAM_H,
-          filter: 'brightness(0.74) contrast(1.1) saturate(0.55)',
+          filter: 'brightness(0.82) contrast(1.06) saturate(0.62)',
           transform: `rotate(${tilt}deg) scale(1.01)`,
         }}
       >
@@ -100,13 +101,13 @@ const CctvStage: React.FC<{local: number; zoom: number}> = ({local, zoom}) => {
           <Cup {...cup} />
         </div>
       </div>
-      {/* cheap sensor texture: scan lines, corner falloff, a little chroma noise */}
+      {/* A mild sensor tint stays legible after the footage is scaled into the monitor. */}
       <div
         style={{
           position: 'absolute',
           inset: 0,
           background:
-            'repeating-linear-gradient(180deg, rgba(0,0,0,0.26) 0px, rgba(0,0,0,0.26) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 3px)',
+            'linear-gradient(180deg, rgba(160,180,172,0.025), rgba(0,0,0,0.02))',
         }}
       />
       <div style={{position: 'absolute', inset: 0, boxShadow: 'inset 0 0 150px rgba(0,0,0,0.62)'}} />
@@ -202,11 +203,18 @@ export const S08Investigate: React.FC<{start: number}> = ({start}) => {
         </g>
       </svg>
 
+      <div style={{position: 'absolute', left: 128, top: 112, fontFamily: '"Noto Sans SC", sans-serif',
+        color: '#EDEADD', fontSize: 58, fontWeight: 600, letterSpacing: 2, opacity: photoIn}}>
+        先找证据，再依法索赔
+      </div>
+      <div style={{position: 'absolute', left: 132, right: 132, top: 206, height: 2,
+        background: '#6E8A80', opacity: photoIn*0.45}} />
+
       {/* 1 · close-up of the cracked rim */}
       <div
         style={{
           position: 'absolute',
-          left: 196,
+          left: 140,
           top: 236 + 24 * (1 - photoIn),
           width: 486,
           height: 372,
@@ -240,7 +248,7 @@ export const S08Investigate: React.FC<{start: number}> = ({start}) => {
       <div
         style={{
           position: 'absolute',
-          left: 742,
+          left: 718,
           top: 268 + 22 * (1 - monIn),
           width: 496,
           height: 372,
@@ -249,6 +257,8 @@ export const S08Investigate: React.FC<{start: number}> = ({start}) => {
           border: '2px solid #3C4C4C',
           boxShadow: '0 18px 38px rgba(0,0,0,0.5)',
           opacity: monIn,
+          transform: 'scale(1.15)',
+          transformOrigin: '0 0',
         }}
       >
         <div style={{position: 'relative', width: 472, height: 298, overflow: 'hidden', background: '#0A1217'}}>
@@ -273,7 +283,7 @@ export const S08Investigate: React.FC<{start: number}> = ({start}) => {
       </div>
 
       {/* 3 · materials gathered, hand pressing the stack */}
-      <div style={{position: 'absolute', left: 1290, top: 392, width: 420, height: 420}}>
+      <div style={{position: 'absolute', left: 1370, top: 392, width: 420, height: 420}}>
         <svg width={420} height={420} viewBox="0 0 420 420" style={{position: 'absolute'}}>
           <rect x={92} y={236} width={250} height={150} rx={10} fill="#2F4A44" stroke="#436A5F" strokeWidth={2} />
           <rect x={92} y={236} width={250} height={26} rx={8} fill="#3B5C53" />
@@ -348,6 +358,7 @@ export const S10Confirm: React.FC<{start: number}> = ({start}) => {
   const phone = phoneStowAt(local);
   const pose: Pose = {
     ...phone.pose,
+    blink: blinkAt(t),
     legNear: standingLegs().near,
     legFar: standingLegs().far,
     breath: Math.sin(t * 1.4),
@@ -437,8 +448,8 @@ export const S12Card: React.FC<{start: number}> = ({start}) => {
       <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center'}}>
         <div
           style={{
-            fontFamily: '"Noto Serif SC", serif',
-            fontSize: 68,
+            fontFamily: '"Noto Sans SC", sans-serif',
+            fontSize: 76,
             fontWeight: 600,
             color: '#F5F2E9',
             letterSpacing: 2,
@@ -451,8 +462,8 @@ export const S12Card: React.FC<{start: number}> = ({start}) => {
         </div>
         <div
           style={{
-            fontFamily: '"Noto Serif SC", serif',
-            fontSize: 68,
+            fontFamily: '"Noto Sans SC", sans-serif',
+            fontSize: 76,
             fontWeight: 600,
             color: '#F5F2E9',
             letterSpacing: 2,

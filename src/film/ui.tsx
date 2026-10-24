@@ -1,5 +1,5 @@
 import React from 'react';
-import {AbsoluteFill, interpolate, useCurrentFrame} from 'remotion';
+import {AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
 import {FONT, PALETTE} from '../theme';
 import {HEIGHT, WIDTH} from './timeline';
 import {VO} from './vo';
@@ -325,16 +325,9 @@ export const Vignette: React.FC<{strength?: number}> = ({strength = 0.42}) => (
 
 /** faint film grain that does not hide art problems (very low opacity) */
 export const Grain: React.FC<{seed?: number}> = () => {
-  const frame = useCurrentFrame();
-  const g = (frame * 37) % 7;
   return (
-    <AbsoluteFill
-      style={{
-        pointerEvents: 'none',
-        opacity: 0.05,
-        backgroundImage: `radial-gradient(rgba(255,255,255,0.5) 0.5px, rgba(0,0,0,0) 0.6px)`,
-        backgroundSize: `${3 + g * 0.2}px ${3 + g * 0.2}px`,
-      }}
-    />
+    <Img src={staticFile('film-v18/paper-texture.png')} style={{position: 'absolute', inset: 0,
+      width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none',
+      mixBlendMode: 'soft-light', opacity: 0.045}} />
   );
 };

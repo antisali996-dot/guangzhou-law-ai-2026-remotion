@@ -12,6 +12,31 @@ const {RIG} = require('../../src/characters/Rig.tsx');
 const {alanAt} = require('../../src/film/alan.ts');
 const {solveTwoBone} = require('../../src/lib/ik.ts');
 
+test('law clauses change on the same rounded frame as their narration', () => {
+  const {lawClauseIndex} = require('../../src/film/lawReading.ts');
+  const marks = [38.7, 41.589, 44.768, 48.825];
+  for (let i = 1; i < marks.length; i++) {
+    const boundary = Math.round(marks[i]*60);
+    assert.equal(lawClauseIndex((boundary-1)/60, marks), i-1);
+    assert.equal(lawClauseIndex(boundary/60, marks), i);
+  }
+});
+
+test('a natural blink briefly closes the eyes and never leaves them shut', () => {
+  const {blinkAt} = require('../../src/lib/blink.ts');
+  let closed = 0, peak = 0;
+  for (let frame = 0; frame < 5040; frame++) {
+    const value = blinkAt(frame/60);
+    assert.ok(value >= 0 && value <= 1);
+    peak = Math.max(peak,value);
+    if (value > 0.5) closed++;
+  }
+  assert.ok(peak > 0.95);
+  assert.ok(closed > 0 && closed/5040 < 0.03);
+  assert.equal(blinkAt(6.7),0);
+  assert.equal(blinkAt(7.1),0);
+});
+
 function assertReach(pose, label) {
   const angle = ((pose.lean || 0) + (pose.chest || 0) * 0.5) * Math.PI / 180;
   const pivot = RIG.shoulderY * 0.3;

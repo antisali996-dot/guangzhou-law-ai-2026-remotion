@@ -5,6 +5,7 @@ import {CONTACT_T} from './cues';
 import {GROUND, HIP_Y, BIKE_DX, HIP_REST, ACTOR_SHIFT} from './geometry';
 export {GROUND, HIP_Y, BIKE_DX, HIP_REST, ACTOR_SHIFT} from './geometry';
 import {buildTrack, sampleTrack} from '../characters/locomotion';
+import {blinkAt} from '../lib/blink';
 
 /* ------------------------------------------------------------- geometry */
 
@@ -138,6 +139,7 @@ export const alanAt = (t: number): AlanState => {
     wheelDeg: wheelRotationFor(hipX - WALK_FROM),
     kickstand: 1 - moving,
     pose: {
+      blink: blinkAt(t),
       lean,
       chest: 1.2 - recoil * 1.8 + loco.swing * 1.1 * moving,
       headYaw,

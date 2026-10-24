@@ -1,12 +1,7 @@
 import React from 'react';
-import {AbsoluteFill, useCurrentFrame} from 'remotion';
-import {Street} from '../../art/Street';
-import {Bike, BIKE} from '../../props/Bike';
-import {Cup} from '../../props/Cup';
-import {TeaStain} from '../../props/Splash';
-import {clamp} from '../../lib/anim';
-import {BigText, Camera, Vignette} from '../ui';
-import {GROUND, CUP_REST, STAIN_X, CUP_GROUND_Y} from '../alan';
+import {AbsoluteFill, Img, interpolate, spring, staticFile, useCurrentFrame} from 'remotion';
+import {FONT} from '../../theme';
+import {FPS} from '../timeline';
 
 /**
  * Cold open: the damaged basket, the fallen cup, the tea running into the wet
@@ -14,49 +9,27 @@ import {GROUND, CUP_REST, STAIN_X, CUP_GROUND_Y} from '../alan';
  */
 export const S00Cold: React.FC<{start: number}> = ({start}) => {
   const frame = useCurrentFrame();
-  const t = start + frame / 60;
-  const q = clamp(frame / 360, 0, 1);
-  const push = q * q * (3 - 2 * q);
-  const scale = 2.3 + push * 0.2;
-
-  // drips run off the cracked rim, two offset streams
-  const dripA = (frame % 66) / 66;
-  const dripB = ((frame + 22) % 66) / 66;
-
+  const first = spring({frame: frame - 12, fps: FPS, config: {damping: 200}, durationInFrames: 30});
+  const second = spring({frame: frame - 50, fps: FPS, config: {damping: 200}, durationInFrames: 30});
+  const detail = interpolate(frame, [0, 360], [1.015, 1.065], {extrapolateRight: 'clamp'});
+  const caption = frame / FPS + start >= 2;
   return (
-    <AbsoluteFill>
-      <Camera x={1096} y={866} scale={scale}>
-        <svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{position: 'absolute'}}>
-          <Street showRain={false} rain={0} dim={0.16} />
-        </svg>
-        <svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{position: 'absolute'}}>
-          <ellipse cx={1020} cy={GROUND + 4} rx={210} ry={14} fill="#080F14" opacity={0.4} />
-        </svg>
-        <Bike x={960} groundY={GROUND} cracked={1} dent={0.62} lean={-1.2} />
-        <Cup {...CUP_REST} />
-        <TeaStain x={STAIN_X} y={CUP_GROUND_Y + 2} amount={1} scale={0.52} />
-        {/* tea still running off the rim */}
-        {[dripA, dripB].map((p, i) => (
-          <circle
-            key={i}
-            cx={960 + BIKE.basketImpact.x + i * 6}
-            cy={790 + p * p * 150}
-            r={2.6}
-            fill="#A67B52"
-            opacity={p < 0.92 ? 0.85 - p * 0.5 : 0}
-          />
-        ))}
-      </Camera>
-      <Vignette strength={0.5} />
-      <BigText
-        lines={[
-          {text: '杯子从楼上飞下，', at: 120},
-          {text: '整栋楼都要赔？', at: 221},
-        ]}
-        y={120}
-        size={70}
-        weight={600}
-      />
+    <AbsoluteFill style={{background: '#11262E'}}>
+      <Img src={staticFile('film-v18/basket-detail.png')} style={{width: '100%', height: '100%', objectFit: 'cover',
+        transform: `scale(${detail})`, transformOrigin: '78% 58%'}} />
+      <AbsoluteFill style={{background: 'linear-gradient(90deg, rgba(10,27,34,0.98) 0%, rgba(10,27,34,0.88) 28%, rgba(10,27,34,0.22) 58%, transparent 80%)'}} />
+      <div style={{position: 'absolute', left: 126, top: 145, fontFamily: FONT.sans, fontSize: 28,
+        color: '#B4CCC5', fontWeight: 500, letterSpacing: 4, opacity: first}}>高空抛物 · 普法短片</div>
+      <div style={{position: 'absolute', left: 118, top: 280, color: '#F4F1E6', fontFamily: FONT.sans,
+        fontSize: 126, lineHeight: 1.16, fontWeight: 700, letterSpacing: 1}}>
+        <div style={{opacity: first, transform: `translateY(${24*(1-first)}px)`}}>这一栋</div>
+        <div style={{opacity: second, transform: `translateY(${24*(1-second)}px)`, color: '#E6BA82'}}>都要赔？</div>
+      </div>
+      <div style={{position: 'absolute', left: 126, top: 654, width: 360*second, height: 4, background: '#C7775B'}} />
+      <div style={{position: 'absolute', left: 126, top: 706, color: '#D5DFD5', fontFamily: FONT.serif,
+        fontSize: 40, lineHeight: 1.5, opacity: caption ? 1 : 0}}>杯子从楼上飞下，<br />责任该由谁承担？</div>
+      <div style={{position: 'absolute', left: 126, bottom: 93, fontFamily: FONT.sans, fontSize: 25,
+        color: '#92ADA7', letterSpacing: 2, opacity: first}}>从一只受损车筐说起</div>
     </AbsoluteFill>
   );
 };

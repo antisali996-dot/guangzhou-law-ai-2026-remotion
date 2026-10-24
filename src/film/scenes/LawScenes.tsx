@@ -4,7 +4,9 @@ import {Street} from '../../art/Street';
 import {Bike} from '../../props/Bike';
 import {Cup} from '../../props/Cup';
 import {TeaStain} from '../../props/Splash';
-import {Camera, EvidenceStill, EVIDENCE_FOCUS, LawText} from '../ui';
+import {Camera, EvidenceStill, EVIDENCE_FOCUS} from '../ui';
+import {LawFocus, LawCompanion} from '../LawFocus';
+import {lawClauseIndex, LAW_HEADINGS} from '../lawReading';
 import {GROUND, ip, smooth, CUP_REST, STAIN_X, CUP_GROUND_Y} from '../alan';
 
 type PhotoSpec = {focus: {x: number; y: number}; scale: number; caption: string};
@@ -15,6 +17,9 @@ type LawShotProps = {
   /** absolute seconds at which each line becomes the current one */
   marks: number[];
   cite: string;
+  headings: readonly string[];
+  section: string;
+  criminal?: boolean;
   dim: number;
   cam: {x: number; y: number; scale: number};
   photo?: PhotoSpec | null;
@@ -24,7 +29,7 @@ type LawShotProps = {
 
 
 /**
- * Schematic for Art. 1254 para. 2: unknown thrower -> who can prove innocence is excluded ->
+ * Schematic for Art. 1254 para. 1: unknown thrower -> who can prove innocence is excluded ->
  * remaining possible users compensate -> compensator may recover from the real thrower.
  * Driven by the same absolute seconds as the narration marks in S07.
  */
@@ -82,8 +87,8 @@ const LegalDiagram: React.FC<{t: number}> = ({t}) => {
           );
         }
       } else {
-        fill = '#C98F4A';
-        stroke = '#F0C27A';
+        fill = glow > 0.02 ? '#C98F4A' : '#6B5434';
+        stroke = glow > 0.02 ? '#F0C27A' : '#A8895A';
         const isCulprit = r === CULPRIT.r && c === CULPRIT.c;
         const rank = k;
         k += 1;
@@ -169,10 +174,10 @@ const LegalDiagram: React.FC<{t: number}> = ({t}) => {
 };
 
 /** A law clause held over the scene it belongs to, with the damage kept in view. */
-const LawShot: React.FC<LawShotProps> = ({start, lines, marks, cite, dim, cam, photo = null, diagram = false, rain = 7}) => {
+const LawShot: React.FC<LawShotProps> = ({start, lines, marks, cite, headings, section, criminal = false, dim, cam, photo = null, diagram = false}) => {
   const frame = useCurrentFrame();
   const t = start + frame / 60;
-  const active = marks.reduce((acc, m) => (t >= m ? acc + 1 : acc), 0) - 1;
+  const active = lawClauseIndex(t, marks);
 
   // a very slow push keeps the frame alive across 8–13 s of text without shaking it
   const push = Math.min(1, frame / 480);
@@ -183,7 +188,7 @@ const LawShot: React.FC<LawShotProps> = ({start, lines, marks, cite, dim, cam, p
     <AbsoluteFill>
       <Camera x={cam.x} y={cam.y} scale={scale}>
         <svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{position: 'absolute'}}>
-          <Street showRain={false} rain={0} dim={dim} />
+          <Street showRain={false} rain={0} dim={Math.max(0, dim - 0.1)} />
         </svg>
         <svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{position: 'absolute'}}>
           <ellipse cx={908} cy={GROUND + 3} rx={180} ry={12} fill="#080F14" opacity={0.38} />
@@ -230,7 +235,9 @@ const LawShot: React.FC<LawShotProps> = ({start, lines, marks, cite, dim, cam, p
         </div>
       ) : null}
       {diagram ? <LegalDiagram t={t} /> : null}
-      <LawText lines={lines} active={Math.max(0, active)} cite={cite} y={diagram ? 410 : 452} size={diagram ? 48 : 52} />
+      {!diagram && !photo ? <LawCompanion criminal={criminal} active={active} /> : null}
+      <LawFocus lines={lines} marks={marks} active={active} start={start} headings={headings}
+        section={section} cite={cite} criminal={criminal} />
       {diagram ? (
         <div style={{position: 'absolute', left: 128, top: 974, fontFamily: '"Noto Sans SC", sans-serif',
           fontSize: 28, color: '#E9D7AD', letterSpacing: 1, padding: '10px 18px',
@@ -248,6 +255,8 @@ export const S05Law: React.FC<{start: number}> = ({start}) => (
     lines={['禁止从建筑物中抛掷物品。']}
     marks={[26.0]}
     cite="《民法典》第1254条第一款（节选）"
+    headings={LAW_HEADINGS.s05}
+    section="禁止高空抛物"
     dim={0.26}
     cam={{x: 1000, y: 662, scale: 1.28}}
   />
@@ -259,6 +268,8 @@ export const S06Law: React.FC<{start: number}> = ({start}) => (
     lines={['从建筑物中抛掷物品或者从建筑物上坠落的物品造成他人损害的，', '由侵权人依法承担侵权责任；']}
     marks={[29.2, 35.319]}
     cite="《民法典》第1254条第一款（节选）"
+    headings={LAW_HEADINGS.s06}
+    section="明确侵权责任"
     dim={0.22}
     cam={{x: 1010, y: 650, scale: 1.24}}
     photo={{focus: EVIDENCE_FOCUS, scale: 2.6, caption: '现场照片 01 · 前篮受损'}}
@@ -276,6 +287,8 @@ export const S07Law: React.FC<{start: number}> = ({start}) => (
     ]}
     marks={[38.7, 41.589, 44.768, 48.825]}
     cite="《民法典》第1254条第一款（节选）"
+    headings={LAW_HEADINGS.s07}
+    section="经调查难以确定侵权人时"
     dim={0.2}
     cam={{x: 990, y: 640, scale: 1.2}}
     diagram
@@ -292,6 +305,9 @@ export const S09Law: React.FC<{start: number}> = ({start}) => (
     ]}
     marks={[59.5, 63.964, 67.79]}
     cite="《刑法》第291条之二第一款"
+    headings={LAW_HEADINGS.s09}
+    section="刑事责任提示"
+    criminal
     dim={0.3}
     cam={{x: 1150, y: 560, scale: 1.16}}
     rain={0}

@@ -5,6 +5,7 @@ import {BIKE, wheelRotationFor} from '../props/Bike';
 import {GROUND, HIP_Y, HIP_REST, BIKE_DX} from './geometry';
 import {phoneStowAt} from './stowPhone';
 import {scene} from './timeline';
+import {blinkAt} from '../lib/blink';
 
 const ease = Easing.inOut(Easing.cubic);
 const progress = (t: number, a: number, b: number) => interpolate(t, [a, b], [0, 1], {
@@ -28,6 +29,7 @@ export const leaveAt = (local: number) => {
   const lookAhead = progress(local, 0.1, 0.9);
   const pose: Pose = {
     ...idle.pose,
+    blink: blinkAt(LEAVE_START + local),
     lean: mix(idle.pose.lean ?? 0, 6 + 4 * loco.amp, ready),
     chest: mix(idle.pose.chest ?? 0, 2.2 + loco.swing * 1.1, ready),
     headYaw: mix(idle.pose.headYaw ?? 0, 0.06, lookAhead),

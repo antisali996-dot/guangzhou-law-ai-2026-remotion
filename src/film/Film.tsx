@@ -92,7 +92,7 @@ export const Film: React.FC = () => (
     ))}
 
     <Grade />
-    <Vignette strength={0.26} />
+    <Vignette strength={0.16} />
   </AbsoluteFill>
 );
 
@@ -127,13 +127,13 @@ const Grade: React.FC = () => (
   <AbsoluteFill style={{pointerEvents: 'none'}}>
     <AbsoluteFill
       style={{
-        background: 'linear-gradient(180deg, rgba(40,92,120,0.20) 0%, rgba(40,92,120,0) 45%, rgba(255,170,90,0.10) 100%)',
+        background: 'linear-gradient(180deg, rgba(40,92,120,0.10) 0%, rgba(40,92,120,0) 45%, rgba(255,170,90,0.06) 100%)',
         mixBlendMode: 'soft-light',
       }}
     />
     <AbsoluteFill
       style={{
-        background: 'radial-gradient(ellipse at 50% 62%, rgba(255,190,120,0.10) 0%, rgba(255,190,120,0) 60%)',
+        background: 'radial-gradient(ellipse at 50% 62%, rgba(255,190,120,0.04) 0%, rgba(255,190,120,0) 60%)',
         mixBlendMode: 'screen',
       }}
     />

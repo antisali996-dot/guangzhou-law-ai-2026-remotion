@@ -3,7 +3,9 @@
 广州骑楼街场景的 AI 辅助普法二维动画工程。
 Remotion 4.0.537 + React 19；1920×1080 / 60fps / 84 秒（5040 帧）。
 
-最新完整成片和 22.5 秒修复预览见 [film-v16 发布页](https://github.com/antisali996-dot/guangzhou-law-ai-2026-remotion/releases/tag/film-v16)。[v16 验收记录](docs/V16-VERIFICATION.md)。
+当前本地优化版：`out/这一栋都要赔_二维动画_1080P60_v18.mp4`。[优化说明](docs/V18-DESIGN.md) · [v18 验收](docs/V18-VERIFICATION.md)。
+
+已归档的 v16 完整成片和 22.5 秒修复预览见 [film-v16 发布页](https://github.com/antisali996-dot/guangzhou-law-ai-2026-remotion/releases/tag/film-v16)。[v16 验收记录](docs/V16-VERIFICATION.md)。
 
 ![全片关键帧](docs/preview.jpg)
 
@@ -54,7 +56,7 @@ npm test
 导出下一版完整成片（指定一个尚不存在的文件名）：
 
 ```powershell
-npm run render:final -- --output "out/这一栋都要赔_二维动画_1080P60_v17.mp4"
+npm run render:final -- --output "out/这一栋都要赔_二维动画_1080P60_v19.mp4"
 ```
 
 此命令执行：检查 → 按源码混音 → 28 条声音对时 → 两遍响度归一 → Remotion 全尺寸渲染 → 封装 → 检查实际交付文件。

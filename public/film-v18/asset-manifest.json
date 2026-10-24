@@ -1,0 +1,18 @@
+{
+  "generator": "GPT built-in imagegen",
+  "purpose": "Supplemental art for optimization of the original v16 film; no online image assets.",
+  "assets": [
+    {
+      "file": "basket-detail.png",
+      "prompt": "Create ONE supplemental close-up insert illustration for the existing animation in the reference. This is an optimization of that exact design, not a new art direction. Match the reference's restrained flat 2D vector-like illustration language, simple large shapes, muted blue-gray and green, warm cream shop light, minimal shading. No anime style, no photorealism, no fantasy glow, no sunset, no gold, no detailed painterly architecture. No human characters. Tight close-up of the SAME BLACK HARD-PLASTIC CITY-BICYCLE BASKET with its vertical ventilation slots and one jagged crack through the upper front-right rim, attached to the same dark gray bicycle. Include a small amount of spilled brown tea on the inside of the basket. The upper part of the front wheel and a simple gray handlebar may be cropped at the lower and upper edges. A clear plastic cup with pale lid and tan straw rests on wet gray-green paving at the bottom-right, safely beside the wheel. Use a composed almost-orthographic three-quarter view with the basket filling most of the RIGHT 60 percent; LEFT 40 percent stays quiet dark muted teal with only a few simple wet pavement shapes for later typography. Keep the graphic shapes and object design closely related to the reference. The image should feel like a carefully art-directed editorial vector close-up with very subtle paper grain and crisp deliberate edges, not an AI art showcase. Wide 16:9 composition. Absolutely NO text, letters, labels, logos, watermark or border. Remove all existing reference text.",
+      "reference": "Original v16 frame at 2.5 seconds",
+      "transparent_background": false
+    },
+    {
+      "file": "paper-texture.png",
+      "prompt": "A seamless neutral warm-off-white fine uncoated paper texture asset for use as a very subtle background in a Chinese educational motion-graphics video. One square edge-to-edge texture, evenly lit, extremely low contrast. Tiny random natural paper fibers and a few very faint flecks, matte soft ivory gray, no yellow cast. No objects, no folds, no creases, no torn edges, no stains, no handwritten marks, no lettering, no watermark, no decorative pattern, no shadows, no gradient, no frame. It should read as clean professional printed-paper stock at 5 to 10 percent visual strength, suitable behind large black typography. Tileable appearance without any obvious focal point.",
+      "reference": null,
+      "transparent_background": false
+    }
+  ]
+}
