@@ -1,0 +1,33 @@
+# Installed dependencies and rendered exports
+/node_modules/
+/out/
+/.cache/
+/.remotion/
+
+# Keep maintained engineering tools; ignore local diagnostics and backups
+/work/*
+!/work/audio/
+!/work/checks/
+/work/audio/__pycache__/
+/work/checks/__pycache__/
+
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.pfx
+*.key
+credentials*.json
+
+# Editor, OS and temporary files
+__pycache__/
+*.py[cod]
+*.tsbuildinfo
+*.log
+*.lock.tmp
+.dsh-ops-update-*.lock
+.DS_Store
+Thumbs.db
+/.vscode/
+/.idea/
