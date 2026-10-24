@@ -8,8 +8,11 @@ import {Splash, TeaStain} from '../../props/Splash';
 import {clamp} from '../../lib/anim';
 import {Camera, Vignette} from '../ui';
 import {GROUND, HIP_Y, RIM_Y, alanAt, smooth, cupAt, CONTACT_X, STAIN_X, T_CONTACT, ACTOR_SHIFT, CUP_GROUND_Y} from '../alan';
+import {OverheadShot, ImpactShot} from '../AngleShots';
+import {INCIDENT_SHOTS} from '../cameraAngles';
+import {f} from '../timeline';
 
-const CUT = 252; // frame of the cut from the mid shot to the accident close shot
+const CUT = f(8.6)-f(6);
 
 const Shadow: React.FC<{x: number; y: number; rx: number; ry: number; opacity?: number}> = ({
   x,
@@ -91,11 +94,9 @@ const AccidentShot: React.FC<{start: number}> = ({start}) => {
 
 export const S01Street: React.FC<{start: number}> = ({start}) => (
   <AbsoluteFill>
-    <Sequence durationInFrames={CUT} layout="none">
-      <MidShot start={start} />
-    </Sequence>
-    <Sequence from={CUT} durationInFrames={376 - CUT} layout="none">
-      <AccidentShot start={start + CUT / 60} />
-    </Sequence>
+    {INCIDENT_SHOTS.map(shot => {
+      const Comp=shot.id==='street'?MidShot:shot.id==='overhead'?OverheadShot:shot.id==='impact'?ImpactShot:AccidentShot;
+      return <Sequence key={shot.id} from={f(shot.start)-f(start)} durationInFrames={f(shot.end)-f(shot.start)} layout="none"><Comp start={shot.start}/></Sequence>;
+    })}
   </AbsoluteFill>
 );

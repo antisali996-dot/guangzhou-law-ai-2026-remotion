@@ -1,0 +1,37 @@
+{
+  "mode": "built-in GPT image generation",
+  "date": "2026-10-24",
+  "shoulderContinuityEdit": "Edit this exact production frame with ONLY one local continuity correction: the fallen transparent cup lying below the phone must have NO straw and only a small brown residue (about 14% cup), because the straw came out during impact and the tea has spilled on pavement. Remove its entire long brown straw. Preserve its lid, cup position, woman's hand anatomy, phone, clothing, basket crack, all composition, palette and flat drawing style EXACTLY. Do not change any other element.",
+  "assets": [
+    {
+      "file": "overhead.png",
+      "prompt": "Use case: illustration-story. Production background plate for an existing Chinese 2D educational animation. Match the reference's restrained FLAT geometric vector-like shapes, simple hard-edged shading, muted blue-gray/green rainy evening and small cream window lights. No photorealism, no anime beautification, no painterly gold glow, no lettering, no subtitles, no borders, 16:9 full bleed. Same woman: plain coral-orange short sleeve shirt, charcoal narrow pants, white shoes, tan crossbody satchel, black low ponytail. Same gray utility bicycle with rigid black plastic front basket with vertical slots. Create a genuinely NEW CAMERA VIEW: very steep high angle looking down from an anonymous upper floor onto the same parked woman and bicycle on wet gray-green sidewalk. Woman small center-left, top/back of head only, both feet planted and one hand holding handlebar, front basket toward right. Bicycle both wheels physically coherent. Foreground unremarkable dark window sill at bottom-left only for depth. Plenty of empty pavement above subjects. Empty intact basket; NO cup, damage, tea spill, hands at window, culprit or extra people. Upper-floor viewpoint creates suspense without identifying anybody. Minimal background details.",
+      "references": [
+        "reference-street.png"
+      ]
+    },
+    {
+      "file": "impact.png",
+      "prompt": "Use case: illustration-story. Production background plate for an existing Chinese 2D educational animation. Match the reference's restrained FLAT geometric vector-like shapes, simple hard-edged shading, muted blue-gray/green rainy evening and small cream window lights. No photorealism, no anime beautification, no painterly gold glow, no lettering, no subtitles, no borders, 16:9 full bleed. Same woman: plain coral-orange short sleeve shirt, charcoal narrow pants, white shoes, tan crossbody satchel, black low ponytail. Same gray utility bicycle with rigid black plastic front basket with vertical slots. New camera low close-up three-quarter front-right view of this same bicycle basket. Use Image1 basket composition as camera reference but simplify surfaces to match Image2 flat animation style. IMPORTANT prepare a BEFORE-IMPACT animation plate: remove every cup, straw, tea, puddle of tea, crack, damage. Basket entirely intact, empty, dry inside. Large black rigid plastic rectangular basket center-right, long vertical slots, thick rim, gray handlebar at upper right, partial front wheel lower edge, wet muted pavement behind. Top front-right rim corner at about 70% image width and 43% height, unobscured because a falling animated cup will strike here. Keep top 25% relatively uncluttered. No people, no text.",
+      "references": [
+        "basket-detail.png",
+        "reference-street.png"
+      ]
+    },
+    {
+      "file": "upward.png",
+      "prompt": "Use case: illustration-story. Production plate for existing Chinese flat 2D educational animation. Match reference EXACT restrained simple vector-like geometry, hard edged flat shadows, desaturated blue-gray/green rainy evening, warm cream window light. No photorealistic painterly texture, no golden anime look, no letters, no text, no subtitles, full bleed 16:9.Create genuinely new low-angle POV looking upward at same ordinary Guangzhou qilou building, from woman standing on pavement. Facade recedes toward upper center with clear vertical perspective. Three rows of simple rectangular apartment windows, four columns. Entire windows visible with uncluttered dark interiors and a few muted cream lit windows. Empty windows, no people, no faces, no silhouette baked into image (animated residents will be added later). Keep large lower-row windows near normalized centers .25/.50/.75 width and .68 height for compositing. Simple projecting cream-gray sills and same blue-gray wall, modest ground floor arch barely visible bottom edge. NO ornate balconies, plants, Canton tower, dramatic sky, new architectural decoration. Dark rainy sky small wedge upper right.",
+      "references": [
+        "reference-residents.png"
+      ]
+    },
+    {
+      "file": "shoulder.png",
+      "prompt": "Use case: illustration-story. Production plate for existing Chinese flat 2D educational animation. Match reference EXACT restrained simple vector-like geometry, hard edged flat shadows, desaturated blue-gray/green rainy evening, warm cream window light. No photorealistic painterly texture, no golden anime look, no letters, no text, no subtitles, full bleed 16:9.NEW CAMERA: close over-the-shoulder view from just behind the SAME woman as she documents damage with her portrait phone, looking downward toward bicycle basket. Left foreground is back of her black low ponytail and plain coral-orange short-sleeved shoulder, tan satchel strap, no face visible. Her RIGHT hand naturally holds one portrait smartphone in front of her at center-right, 5 natural fingers, not two phones, not floating hand. Phone face shown as a flat simple dark rectangular display with no baked text, to be composited later. Keep display rectangle approximately center x62% y47%, roughly width15% image height45%, near front-facing screen with slight perspective. Damaged rigid black vertical-slot basket lower right behind phone, gray bicycle wheel, brown spill and discarded clear milk tea cup on wet sidewalk. Same unglamorous flat graphic style. No extra props, no additional hands, no warm halo.",
+      "references": [
+        "reference-street.png",
+        "reference-phone.png"
+      ]
+    }
+  ]
+}

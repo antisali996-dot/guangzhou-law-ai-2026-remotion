@@ -3,11 +3,13 @@
 广州骑楼街场景的 AI 辅助普法二维动画工程。
 Remotion 4.0.537 + React 19；1920×1080 / 60fps / 84 秒（5040 帧）。
 
-当前本地优化版：`out/这一栋都要赔_二维动画_1080P60_v18.mp4`。[优化说明](docs/V18-DESIGN.md) · [v18 验收](docs/V18-VERIFICATION.md)。
+当前本地多机位版：`out/这一栋都要赔_二维动画_1080P60_v19.mp4`。[分镜与美术说明](docs/V19-DESIGN.md) · [v19 验收](docs/V19-VERIFICATION.md)。
+
+剧情短预览：`out/多机位剧情预览_v19.mp4`（6–26 秒，960×540）。上一版 v18 保留：[优化说明](docs/V18-DESIGN.md) · [验收记录](docs/V18-VERIFICATION.md)。
 
 已归档的 v16 完整成片和 22.5 秒修复预览见 [film-v16 发布页](https://github.com/antisali996-dot/guangzhou-law-ai-2026-remotion/releases/tag/film-v16)。[v16 验收记录](docs/V16-VERIFICATION.md)。
 
-![全片关键帧](docs/preview.jpg)
+![v19 全片关键帧](docs/preview-v19.jpg)
 
 ## 获取与运行（Windows）
 
@@ -24,13 +26,14 @@ npm run studio
 Chrome 默认位置在 `remotion.config.ts`；更换电脑时请按本机安装路径调整 `Config.setBrowserExecutable(...)`。
 音频工具的 FFmpeg / ffprobe 路径位于 `work/audio/timeline_audio.py`，默认是 `D:\dshws\tools\ffmpeg\bin`，请按本机安装位置调整 `FF` / `PROBE` 后再混音、验收或导出。
 
-仓库包含预览和渲染所需的本地字体、旁白、配乐及音效；无需在线生成素材。`node_modules`、渲染缓存、调试备份和历史视频不进入 Git。最新成片放在发布页，下载后可放回 `out/`。
+仓库包含预览和渲染所需的本地字体、旁白、配乐、音效和已生成的美术资源；无需在线生成素材。`node_modules`、渲染缓存、调试备份和历史视频不进入 Git。v19 当前为本地待审版本，未上传发布页；已发布的历史版本可从对应发布页下载并放回 `out/`。
 素材来源及字体许可见 [THIRD_PARTY.md](THIRD_PARTY.md)。
 
 ## 维护入口
 
 - `src/Root.tsx`：主片 Film，以及动作和环境自检合成。
 - `src/film/timeline.ts`：13 个分镜的起止时间。
+- `src/film/cameraAngles.ts`、`AngleShots.tsx`：事件内的多机位时间、杯子近景投影、窗口人物与手机屏幕合成。
 - `src/film/vo.ts`：11 段旁白、字幕和引用标签。
 - `src/film/cues.ts`：17 个音效时刻与唯一的配乐增益；预览、混音和验收共同读取。
 - `src/film/cctv.ts`：监控回放的事件时间、人物、共享杯子轨迹、时间码及显式定格。
@@ -56,7 +59,7 @@ npm test
 导出下一版完整成片（指定一个尚不存在的文件名）：
 
 ```powershell
-npm run render:final -- --output "out/这一栋都要赔_二维动画_1080P60_v19.mp4"
+npm run render:final -- --output "out/这一栋都要赔_二维动画_1080P60_v20.mp4"
 ```
 
 此命令执行：检查 → 按源码混音 → 28 条声音对时 → 两遍响度归一 → Remotion 全尺寸渲染 → 封装 → 检查实际交付文件。

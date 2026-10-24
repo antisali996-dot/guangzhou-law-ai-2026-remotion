@@ -8,6 +8,8 @@ import {TeaStain} from '../../props/Splash';
 import {Camera, EvidenceStill, EVIDENCE_FOCUS, HeldPhone, Vignette} from '../ui';
 import {BIKE_DX, GROUND, HIP_REST, HIP_Y, alanAt, ip, smooth, CUP_REST, STAIN_X, CUP_GROUND_Y} from '../alan';
 import {phoneTakeOutAt, phoneAboveBagPoints} from '../stowPhone';
+import {ShoulderShot} from '../AngleShots';
+import {SHOULDER_LOCAL} from '../cameraAngles';
 
 
 /** A: phone comes up; B: what the screen sees; C: the saved photo, held up. */
@@ -28,6 +30,8 @@ export const S04Evidence: React.FC<{start: number}> = ({start}) => {
   const phone = phoneTakeOutAt(local);
   const pose: Pose = {...base.pose, ...phone.pose, breath: Math.sin(t * 1.6) * 0.8};
   const clipPoints = phoneAboveBagPoints(pose);
+
+  if (local >= SHOULDER_LOCAL.start && local < SHOULDER_LOCAL.end) return <ShoulderShot local={local}/>;
 
   return (
     <AbsoluteFill>

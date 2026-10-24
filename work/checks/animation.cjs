@@ -12,6 +12,42 @@ const {RIG} = require('../../src/characters/Rig.tsx');
 const {alanAt} = require('../../src/film/alan.ts');
 const {solveTwoBone} = require('../../src/lib/ik.ts');
 
+test('new incident cameras cover every frame and keep the impact inside its close-up', () => {
+  const {INCIDENT_SHOTS,shotAtFrame,SHOULDER_LOCAL} = require('../../src/film/cameraAngles.ts');
+  const {T_CONTACT} = require('../../src/film/alan.ts');
+  const {f} = require('../../src/film/timeline.ts');
+  for(let frame=f(6);frame<f(12.264);frame++) {
+    assert.equal(INCIDENT_SHOTS.filter(s=>frame>=f(s.start)&&frame<f(s.end)).length,1);
+  }
+  assert.equal(shotAtFrame(f(T_CONTACT)).id,'impact');
+  assert.equal(shotAtFrame(f(8.6)-1).id,'street');
+  assert.equal(shotAtFrame(f(8.6)).id,'overhead');
+  assert.ok(SHOULDER_LOCAL.start>=2, 'physical retrieval must finish before the shoulder cut');
+  assert.ok(19.3+SHOULDER_LOCAL.end<22.6, 'shutter must remain visible in the phone close-up');
+});
+
+test('macro camera projects the shared physical contact to its calibrated rim without a jump', () => {
+  const {IMPACT_CAMERA,macroCupAt} = require('../../src/film/cameraAngles.ts');
+  const {T_CONTACT} = require('../../src/film/alan.ts');
+  const c=macroCupAt(T_CONTACT);
+  assert.ok(Math.hypot(c.x-IMPACT_CAMERA.x,c.y-IMPACT_CAMERA.y)<1e-8);
+  for(const direction of [-1,1]) {
+    const near=macroCupAt(T_CONTACT+direction*1e-6);
+    assert.ok(Math.hypot(near.x-c.x,near.y-c.y)<.01);
+  }
+  assert.ok(macroCupAt(T_CONTACT-.08).y<c.y);
+});
+
+test('phone screen perspective maps all four corners into the generated phone', () => {
+  const {PHONE_PLANE,planeMatrix} = require('../../src/film/cameraAngles.ts');
+  const m=planeMatrix(PHONE_PLANE,300,600).slice(9,-1).split(',').map(Number);
+  for(const [i,[x,y]] of [[0,0],[300,0],[300,600],[0,600]].entries()) {
+    const w=m[3]*x+m[7]*y+m[15];
+    const actual={x:(m[0]*x+m[4]*y+m[12])/w,y:(m[1]*x+m[5]*y+m[13])/w};
+    assert.ok(Math.hypot(actual.x-PHONE_PLANE[i].x,actual.y-PHONE_PLANE[i].y)<1e-8);
+  }
+});
+
 test('law clauses change on the same rounded frame as their narration', () => {
   const {lawClauseIndex} = require('../../src/film/lawReading.ts');
   const marks = [38.7, 41.589, 44.768, 48.825];
