@@ -19,7 +19,7 @@ python -m pip install -r requirements.txt
 npm run studio
 ```
 
-Chrome 默认位置在 `remotion.config.ts`；更换电脑时可设置 `REMOTION_BROWSER_EXECUTABLE`。
+Chrome 默认位置在 `remotion.config.ts`；更换电脑时请按本机安装路径调整 `Config.setBrowserExecutable(...)`。
 音频工具的 FFmpeg / ffprobe 路径位于 `work/audio/timeline_audio.py`，默认是 `D:\dshws\tools\ffmpeg\bin`，请按本机安装位置调整 `FF` / `PROBE` 后再混音、验收或导出。
 
 仓库包含预览和渲染所需的本地字体、旁白、配乐及音效；无需在线生成素材。`node_modules`、渲染缓存、调试备份和历史视频不进入 Git。最新成片放在发布页，下载后可放回 `out/`。
