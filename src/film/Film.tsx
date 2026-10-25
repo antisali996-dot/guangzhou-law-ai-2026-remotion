@@ -12,6 +12,7 @@ import {S03Residents} from './scenes/S03Residents';
 import {S04Evidence} from './scenes/S04Evidence';
 import {S05Law, S06Law, S07Law, S09Law} from './scenes/LawScenes';
 import {S08Investigate, S10Confirm, S11Leave, S12Card} from './scenes/Ending';
+import {foregroundRainAt} from './cameraAngles';
 
 type SceneProps = {start: number};
 
@@ -104,6 +105,7 @@ const rnd = (i: number) => {
 };
 const Rain: React.FC = () => {
   const frame = useCurrentFrame();
+  if (!foregroundRainAt(frame)) return null;
   return (
     <AbsoluteFill style={{pointerEvents: 'none'}}>
       <svg width={1920} height={1080} viewBox="0 0 1920 1080">

@@ -9,6 +9,7 @@ import {Cup} from '../props/Cup';
 import {TeaStain} from '../props/Splash';
 import {CUP_REST, STAIN_X, CUP_GROUND_Y} from './alan';
 import type {Vec} from '../lib/ik';
+import {isLegalFrame} from './legalFlow';
 import {PHONE_HEIGHT} from './stowPhone';
 
 /* ------------------------------------------------------------------ camera */
@@ -110,7 +111,7 @@ export const Subtitles: React.FC = () => {
   const frame = useCurrentFrame();
   const sec = frame / 60;
   const cue = cueAt(sec);
-  if (!cue) {
+  if (!cue || isLegalFrame(frame)) {
     return null;
   }
   const fadeIn = interpolate(sec, [cue.t0 - 0.06, cue.t0 + 0.1], [0, 1], {

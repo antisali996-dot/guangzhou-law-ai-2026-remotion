@@ -32,3 +32,6 @@ export const planeMatrix = (p: readonly Point[], width: number, height: number):
   return `matrix3d(${(b.x-a.x+g*b.x)/width},${(b.y-a.y+g*b.y)/width},0,${g/width},${(d.x-a.x+h*d.x)/height},${(d.y-a.y+h*d.y)/height},0,${h/height},0,0,1,0,${a.x},${a.y},0,1)`;
 };
 export const PHONE_PLANE = [{x:1073,y:272},{x:1254,y:278},{x:1223,y:630},{x:1055,y:619}] as const;
+
+/** Rain belongs in front of outdoor cameras, never across a phone UI or evidence desk. */
+export const foregroundRainAt = (frame: number): boolean => frame < f(22.3) || (frame >= f(70.3) && frame < f(78));

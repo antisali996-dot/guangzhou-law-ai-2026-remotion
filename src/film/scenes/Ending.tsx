@@ -168,17 +168,26 @@ export const S08Investigate: React.FC<{start: number}> = ({start}) => {
 
   const photoIn = ip(local, [0.15, 0.95], [0, 1], smooth);
   const monIn = ip(local, [1.7, 2.5], [0, 1], smooth);
-  const paper1 = ip(local, [3.5, 4.1], [0, 1], smooth);
-  const paper2 = ip(local, [4.0, 4.6], [0, 1], smooth);
-  const paper3 = ip(local, [4.5, 5.1], [0, 1], smooth);
-  const handIn = ip(local, [4.4, 5.2], [0, 1], smooth);
-  const settled = ip(local, [6.0, 6.6], [0, 1], smooth);
+  const paper1 = ip(local, [5.45, 5.85], [0, 1], smooth);
+  const paper2 = ip(local, [5.7, 6.15], [0, 1], smooth);
+  const paper3 = ip(local, [5.95, 6.4], [0, 1], smooth);
+  const handIn = ip(local, [6.1, 6.8], [0, 1], smooth);
+  const settled = ip(local, [6.85, 7.25], [0, 1], smooth);
 
   const papers = [
     {v: paper1, x: 1392, y: 596, rot: -4.5, fill: '#D9D2BF'},
     {v: paper2, x: 1424, y: 606, rot: 2.4, fill: '#E5DECB'},
     {v: paper3, x: 1408, y: 618, rot: -0.8, fill: '#CFC7B4'},
   ];
+
+  if (local < 5.45) return <AbsoluteFill style={{background:'#101E23'}}>
+    <div style={{position:'absolute',left:360,top:84,color:'#EDEADD',fontFamily:'"Noto Sans SC", sans-serif',fontSize:46,fontWeight:600}}>监控与其他证据，锁定抛物者</div>
+    <div style={{position:'absolute',left:360,top:160,width:1190,height:753,overflow:'hidden',border:'2px solid #77958A'}}>
+      <div style={{position:'absolute',width:1920,height:1080,transform:'scale(0.84) translate(-252px,-92px)',transformOrigin:'0 0'}}>
+        <CctvStage local={Math.max(0,local-1.5)} zoom={1}/>
+      </div>
+    </div>
+  </AbsoluteFill>;
 
   return (
     <AbsoluteFill style={{backgroundColor: '#0B1216'}}>
@@ -446,6 +455,7 @@ export const S12Card: React.FC<{start: number}> = ({start}) => {
         </defs>
       </svg>
       <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center'}}>
+        <div style={{position:'absolute',top:150,left:0,right:0,textAlign:'center',fontFamily:'"Noto Sans SC", sans-serif',fontSize:36,color:'#B6CEC0',opacity:first}}>整栋都要赔？先查证据，再依法定责。</div>
         <div
           style={{
             fontFamily: '"Noto Sans SC", sans-serif',

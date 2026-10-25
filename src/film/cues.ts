@@ -25,7 +25,7 @@ export const SFX_CUES: SfxCue[] = [
   {at: CONTACT_T + 0.033, file: 'sfx-splash.wav', v: 0.70},
   {at: CONTACT_T + 0.503, file: 'sfx-cupdrop.wav', v: 0.54},
   {at: 22.60, file: 'sfx-shutter.wav', v: 0.55},
-  {at: 56.40, file: 'sfx-paper.wav', v: 0.50},
+  {at: 58.00, file: 'sfx-paper.wav', v: 0.50},
   {at: LEAVE_START + LEAVE_WALK_DELAY + 0.15, file: 'sfx-wheel.wav', v: 0.42},
   ...LEAVE.strikeTimes.map((at, i) => step(LEAVE_START + at, Math.max(0.30, 0.42 - i * 0.02))),
 ];

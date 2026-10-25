@@ -12,6 +12,36 @@ const {RIG} = require('../../src/characters/Rig.tsx');
 const {alanAt} = require('../../src/film/alan.ts');
 const {solveTwoBone} = require('../../src/lib/ik.ts');
 
+test('foreground rain stays outside phone interfaces, evidence desks and reading scenes', () => {
+  const {foregroundRainAt}=require('../../src/film/cameraAngles.ts');
+  for(const [time,rain] of [[8,true],[21.8,true],[22.3,false],[25,false],[31,false],[55,false],[65,false],[71,true],[77.9,true],[78,false],[83,false]]) assert.equal(foregroundRainAt(Math.round(time*60)),rain);
+});
+
+test('legal flow uses the spoken frame boundaries and does not accuse possible users early', () => {
+  const {COMPENSATION_MARKS,compensationPhaseAt,windowStateAt} = require('../../src/film/legalFlow.ts');
+  const {VO}=require('../../src/film/vo.ts');
+  assert.deepEqual([...COMPENSATION_MARKS],VO.find(v=>v.id==='L07').show.map(s=>s.t0));
+  for(let phase=0;phase<4;phase++) {
+    const states=Array.from({length:12},(_,i)=>windowStateAt(Math.floor(i/4),i%4,phase));
+    if(phase<3) assert.ok(!states.includes('identified'));
+    if(phase===0) assert.ok(states.every(s=>s==='unknown'));
+    if(phase===1) assert.equal(states.filter(s=>s==='excluded').length,8);
+    if(phase===2) assert.equal(states.filter(s=>s==='possible').length,4);
+  }
+  for(let i=1;i<4;i++) {
+    const boundary=Math.round(COMPENSATION_MARKS[i]*60);
+    assert.equal(compensationPhaseAt((boundary-1)/60),i-1);
+    assert.equal(compensationPhaseAt(boundary/60),i);
+  }
+});
+
+test('legal quotation replaces duplicate captions only within the legal scenes', () => {
+  const {isLegalFrame,CRIMINAL_QUOTES}=require('../../src/film/legalFlow.ts');
+  for(const [frame,value] of [[1559,false],[1560,true],[3119,true],[3120,false],[3569,false],[3570,true],[4217,true],[4218,false]]) assert.equal(isLegalFrame(frame),value);
+  assert.ok(CRIMINAL_QUOTES[0].includes('情节严重的'));
+  assert.equal(CRIMINAL_QUOTES[1],'处一年以下有期徒刑、拘役或者管制，');
+});
+
 test('post-impact surprise settles at rest without driving brows into the eyes', () => {
   const {reactionSurpriseAt} = require('../../src/film/scenes/S02Reaction.tsx');
   let previous=0.95;
