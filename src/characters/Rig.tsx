@@ -1,6 +1,7 @@
 import React from 'react';
 import {solveTwoBone, type Vec} from '../lib/ik';
 import {SKIN} from '../theme';
+import {Head} from './Head';
 
 /**
  * Layered 2-D character rig (flat illustration with two-tone modelling).
@@ -12,7 +13,8 @@ import {SKIN} from '../theme';
  */
 
 export const RIG = {
-  hipHalf: 21,
+  hipHalf: 13,
+  farHipY: -6,
   thigh: 96,
   shin: 90,
   footH: 24,
@@ -299,32 +301,44 @@ const Arm: React.FC<{
   );
 };
 
-const Leg: React.FC<{hip: Vec; spec: LegSpec; look: CharacterLook; near: boolean}> = ({
-  hip,
-  spec,
-  look,
-  near,
-}) => {
+/** Mostly straight cloth over each bone, with a small rounded knee joint. */
+export const legGeometryFor = (hip: Vec, spec: LegSpec) => {
   const knee = {
     x: hip.x + Math.sin(rad(spec.hip)) * RIG.thigh,
     y: hip.y + Math.cos(rad(spec.hip)) * RIG.thigh,
   };
   const a2 = rad(spec.hip + spec.knee);
   const ankle = {x: knee.x + Math.sin(a2) * RIG.shin, y: knee.y + Math.cos(a2) * RIG.shin};
+  const upper = {x: Math.sin(rad(spec.hip)), y: Math.cos(rad(spec.hip))};
+  const lower = {x: Math.sin(a2), y: Math.cos(a2)};
+  const bend = {x: Math.sin(rad(spec.hip + spec.knee / 2)), y: Math.cos(rad(spec.hip + spec.knee / 2))};
+  const offset = (p: Vec, t: Vec, width: number): Vec => ({x: p.x - t.y * width, y: p.y + t.x * width});
+  const along = (p: Vec, t: Vec, distance: number): Vec => ({x: p.x + t.x * distance, y: p.y + t.y * distance});
+  const p = (v: Vec) => `${v.x} ${v.y}`;
+  const hL = offset(hip, upper, 14.6), hR = offset(hip, upper, -14.6);
+  const kneeWidth = 11.3 / Math.max(.5, Math.cos(rad(spec.knee / 2)));
+  const kL = offset(knee, bend, kneeWidth), kR = offset(knee, bend, -kneeWidth);
+  const aL = offset(ankle, lower, 6.6), aR = offset(ankle, lower, -6.6);
+  const round = 10;
+  // Keep the long thigh and shin edges straight. A full-length smooth spline made
+  // both bones look like a rubber hose, even when their joint positions were valid.
+  const outline = `M ${p(hL)} L ${p(along(kL, upper, -round))} Q ${p(kL)} ${p(along(kL, lower, round))} L ${p(aL)} Q ${p(along(ankle, lower, 3))} ${p(aR)} L ${p(along(kR, lower, round))} Q ${p(kR)} ${p(along(kR, upper, -round))} L ${p(hR)} C ${p(along(hR, upper, -19.5))} ${p(along(hL, upper, -19.5))} ${p(hL)} Z`;
+  return {knee, ankle, outline, crease: `M ${p(offset(knee, bend, 6))} Q ${p(along(knee, bend, 3))} ${p(offset(knee, bend, -5))}`};
+};
+
+const Leg: React.FC<{hip: Vec; spec: LegSpec; look: CharacterLook; near: boolean}> = ({hip, spec, look, near}) => {
+  const {knee, ankle, outline, crease} = legGeometryFor(hip, spec);
   const pants = near ? look.pants : look.pantsShade;
   return (
-    <g>
-      {near ? null : <circle cx={hip.x} cy={hip.y + 6} r={14} fill={pants} />}
-      <path d={limbPath({x: hip.x, y: hip.y + 8}, knee, 14.6, 11.6)} fill={pants} />
-      <path d={limbPath(knee, ankle, 11, 6.6)} fill={pants} />
-      <circle cx={knee.x} cy={knee.y} r={11.2} fill={pants} />
+    <g data-body-part={near ? 'near-leg' : 'far-leg'}>
+      <path data-cloth="trouser" d={outline} fill={pants} />
       {/* knee crease and a turned-up cuff */}
       <path
-        d={`M ${knee.x - 8} ${knee.y + 3} q 8 4 16 -1`}
+        d={crease}
         stroke={look.pantsShade}
-        strokeWidth={2.2}
+        strokeWidth={1.3}
         fill="none"
-        opacity={0.5}
+        opacity={0.22}
       />
       <path d={limbPath({x: ankle.x + (knee.x - ankle.x) * 0.08, y: ankle.y + (knee.y - ankle.y) * 0.08}, ankle, 7.4, 7.2)} fill={look.pantsShade} opacity={0.7} />
       {/* shoe */}
@@ -333,106 +347,6 @@ const Leg: React.FC<{hip: Vec; spec: LegSpec; look: CharacterLook; near: boolean
         <path d="M -10 6 l 30 -1 q 2 3 -1 5 l -28 0 q -2 -2 -1 -4 z" fill={look.shoeSole} />
         <path d="M 2 -2 q 6 3 10 1" stroke={look.shoeSole} strokeWidth={1.6} fill="none" opacity={0.7} />
       </g>
-    </g>
-  );
-};
-
-const Head: React.FC<{
-  yaw: number;
-  nod: number;
-  tilt: number;
-  look: CharacterLook;
-  ponytail: number;
-  surprise?: number;
-  mood?: number;
-  blink?: number;
-}> = ({yaw, nod, tilt, look, ponytail, surprise = 0, mood = 0.25, blink = 0}) => {
-  const f = yaw * 6; // features slide with the head turn
-  const squash = 1 - Math.abs(yaw) * 0.07;
-  const m = nod * 0.08;
-  const sx = surprise;
-  const worry = Math.max(0, -mood);
-  const smile = Math.max(0, mood);
-  const eyeOpen = Math.max(0.04, 1 - Math.min(1, Math.max(0, blink)));
-  return (
-    <g transform={`rotate(${tilt}) translate(${yaw * 2} 0)`}>
-      {/* neck: slim, lit from the front, shadow thrown by the jaw */}
-      <path d="M -7 12 L 7.5 12 L 9 36 Q 0 47 -9 36 Z" fill={look.skin} />
-      <path d="M -7 12 L 7.5 12 L 8 25 Q 0 31 -7 25 Z" fill={look.skinShade} opacity={0.75} />
-      <path d="M -9 36 Q 0 47 9 36 L 9 38 Q 0 49 -9 38 Z" fill={look.skinShade} opacity={0.4} />
-      {/* ponytail: tied low behind the head, soft tapered tail */}
-      {look.hairStyle === 'ponytail' ? (
-        <g transform={`rotate(${ponytail} -21 -16)`}>
-          <path
-            d="M -21 -24 C -35 -22 -43 -4 -41 13 C -40 26 -34 36 -26 38 C -18 39 -15 31 -21 24 C -27 14 -27 2 -23 -9 Z"
-            fill={look.hairShade}
-          />
-          <path d="M -26 -17 C -33 -9 -35 6 -32 18" stroke={look.hair} strokeWidth={3.2} fill="none" opacity={0.42} strokeLinecap="round" />
-          <path d="M -30 8 C -31 18 -29 27 -26 33" stroke="#4A3F3C" strokeWidth={1.6} fill="none" opacity={0.5} strokeLinecap="round" />
-          <rect x={-27} y={-26} width={9} height={7.5} rx={3.2} fill="#C9604F" transform="rotate(-24 -22 -22)" />
-        </g>
-      ) : null}
-      <g transform={`scale(${squash} 1) translate(${-f * 0.1} 0)`}>
-        {/* face: full forehead, soft cheeks, small rounded chin */}
-        <path
-          d="M -24 -4 C -25 -21 -13 -31 2 -31 C 17 -31 27 -21 27 -6 C 27 4 24 12 20 19 C 16 25 9 29 2 29 C -8 29 -17 25 -21 16 C -23 11 -24 4 -24 -4 Z"
-          fill={look.skin}
-        />
-        <path d="M 8 9 C 18 11 22 18 18 24 C 13 29 6 30 1 29 C 7 24 10 16 8 9 Z" fill={look.skinShade} opacity={0.16} />
-        {/* ear + earring */}
-        <ellipse cx={-21} cy={4} rx={4.4} ry={6.2} fill={look.skinShade} />
-        <ellipse cx={-21} cy={4.5} rx={2.2} ry={3.6} fill={look.skin} opacity={0.5} />
-        <circle cx={-21} cy={10.4} r={1.8} fill="#F2D27A" />
-        {/* brows: thin, softly arched; inner ends lift when worried */}
-        <path d={`M ${-9 + f} ${-13.6 - 3 * sx + 0.8 * worry} q 4.6 ${-2.6 - 1.2 * worry} 9 ${0.2 - 3.6 * worry}`} stroke="#3A2D29" strokeWidth={1.7} fill="none" strokeLinecap="round" />
-        <path d={`M ${6.4 + f} ${-14.2 - 3 * sx - 3 * worry} q 4.6 ${-2.2 + 1.4 * worry} 8.8 ${1.2 + 3 * worry}`} stroke="#3A2D29" strokeWidth={1.7} fill="none" strokeLinecap="round" />
-        {/* eyes: small sclera, large dark iris tucked under the lid, one catch-light */}
-        <g transform={`translate(0 -3.2) scale(1 ${eyeOpen}) translate(0 3.2)`}>
-        <ellipse cx={-4.4 + f} cy={-3.2} rx={4.1} ry={4.5 + 0.8 * sx} fill="#F7F2EA" />
-        <ellipse cx={10.6 + f} cy={-3.2} rx={3.8} ry={4.4 + 0.8 * sx} fill="#F7F2EA" />
-        <circle cx={-3.6 + f} cy={-3.2} r={3} fill="#44302A" />
-        <circle cx={11.3 + f} cy={-3.2} r={2.8} fill="#44302A" />
-        <circle cx={-3.5 + f} cy={-3.2} r={1.7} fill="#15100E" />
-        <circle cx={11.4 + f} cy={-3.2} r={1.6} fill="#15100E" />
-        <circle cx={-2.7 + f} cy={-4.2} r={0.85} fill="#fff" opacity={0.95} />
-        <circle cx={12.1 + f} cy={-4.2} r={0.8} fill="#fff" opacity={0.95} />
-        {/* upper lids and one soft outer lash each */}
-        <path d={`M ${-9 + f} -4.2 q 4.6 -5.2 9 -0.2`} stroke="#2B221F" strokeWidth={1.5} fill="none" strokeLinecap="round" />
-        <path d={`M ${7 + f} -4.2 q 4.3 -4.8 8.4 -0.2`} stroke="#2B221F" strokeWidth={1.5} fill="none" strokeLinecap="round" />
-        <path d={`M ${-9 + f} -4.2 l -2 -1.2`} stroke="#2B221F" strokeWidth={1.2} strokeLinecap="round" fill="none" />
-        <path d={`M ${15.4 + f} -4.4 l 1.8 -1.3`} stroke="#2B221F" strokeWidth={1.2} strokeLinecap="round" fill="none" />
-        </g>
-        <g opacity={blink} stroke="#2B221F" strokeWidth={1.4} strokeLinecap="round" fill="none">
-          <path d={`M ${-9+f} -3.2 q 4.6 1.1 9 0`} />
-          <path d={`M ${7+f} -3.2 q 4.3 1.1 8.4 0`} />
-        </g>
-        {/* nose: a small shaded tip, no hook */}
-        <path d={`M ${14.6 + f} 2.4 q 2.2 2.2 0.2 4.4`} stroke={look.skinShade} strokeWidth={1.3} fill="none" strokeLinecap="round" opacity={0.85} />
-        {/* cheek colour, kept subtle */}
-        <ellipse cx={3.5 + f} cy={10.4} rx={4.8} ry={2.8} fill="#E58C7C" opacity={0.17} />
-        {/* mouth: follows mood */}
-        {sx > 0.35 ? (
-          <ellipse cx={8 + f} cy={16.6 + m} rx={2.6} ry={1.3 + 2.1 * sx} fill="#7A3F33" />
-        ) : (
-          <>
-            <path d={`M ${3.4 + f} ${16 + m} q 4.6 ${5.6 * smile - 3.8 * worry} 9.2 ${-0.8 * smile + 0.4 * worry}`} stroke="#B8564C" strokeWidth={2.1} fill="none" strokeLinecap="round" />
-            {smile > 0.15 ? <path d={`M ${12.4 + f} ${15.6 + m} q 0.9 0.2 1.2 -0.7`} stroke="#B8564C" strokeWidth={1.2} fill="none" strokeLinecap="round" /> : null}
-          </>
-        )}
-      </g>
-      {/* hair: rounded crown, side-swept fringe that clears the brows, side lock past the ear */}
-      <path
-        d="M -28 -2 C -33 -27 -16 -40 2 -39 C 21 -38 32 -25 29 -5 C 26 -13 21 -19 14 -22 C 6 -19 -9 -19 -18 -11 C -21 -5 -22 8 -22 15 C -26 12 -29 4 -28 -2 Z"
-        fill={look.hair}
-      />
-      <path
-        d="M 28 -8 C 27 -27 13 -37 -3 -35 C -19 -34 -27 -22 -26 -8 C -17 -21 -3 -27 8 -24 C 17 -22 24 -17 28 -8 Z"
-        fill={look.hair}
-      />
-      <path d="M -24 -9 C -27 2 -28 16 -24 28 C -19 19 -19 4 -19 -7 Z" fill={look.hairShade} />
-      <path d="M -8 -34 C 5 -36 18 -30 25 -18" stroke="#5A4F4B" strokeWidth={2.2} fill="none" opacity={0.4} strokeLinecap="round" />
-      <path d="M 14 -22 C 8 -25 0 -25 -6 -22" stroke={look.hairShade} strokeWidth={1.6} fill="none" opacity={0.5} />
-      <path d="M 22 -12 C 20 -17 17 -20 13 -22" stroke={look.hairShade} strokeWidth={1.4} fill="none" opacity={0.45} strokeLinecap="round" />
     </g>
   );
 };
@@ -450,11 +364,7 @@ export const Actor: React.FC<{
   /** Object held in the near hand; anchored to the solved wrist. */
   nearProp?: (wrist: Vec, angle: number) => React.ReactNode;
   bagOpen?: number;
-  /** 'behind' = far leg only (draw before the bike); 'front' = the rest; default draws everything. */
-  part?: 'all' | 'behind' | 'front';
-}> = ({pose, x, y, scale = 1, facing = 1, look = ALAN_LOOK, opacity = 1, bob = 0, nearProp, bagOpen = 0, part = 'all'}) => {
-  const drawBehind = part !== 'front';
-  const drawFront = part !== 'behind';
+}> = ({pose, x, y, scale = 1, facing = 1, look = ALAN_LOOK, opacity = 1, bob = 0, nearProp, bagOpen = 0}) => {
   const lean = pose.lean ?? 0;
   const chest = pose.chest ?? 0;
   const yaw = Math.max(-1, Math.min(1, pose.headYaw ?? 0));
@@ -479,6 +389,7 @@ export const Actor: React.FC<{
 
   return (
     <svg
+      data-character="actor"
       width={460}
       height={680}
       viewBox="-230 -330 460 680"
@@ -495,17 +406,17 @@ export const Actor: React.FC<{
       }}
     >
       <g transform={`translate(0 ${bob})`}>
-        {/* far leg behind the bike, far arm behind the body */}
-        {drawBehind ? <Leg hip={{x: -RIG.hipHalf, y: 0}} spec={legFar} look={look} near={false} /> : null}
-        {drawFront ? <Arm geom={farArm} look={look} near={false} hand={farHand} /> : null}
-        {drawFront ? <>
+        {/* Both legs belong to one person standing beside the bike. 'Far' here
+            describes the person's own depth, never the other side of the frame. */}
+        <Leg hip={{x: -RIG.hipHalf, y: RIG.farHipY}} spec={legFar} look={look} near={false} />
+        <Arm geom={farArm} look={look} near={false} hand={farHand} />
 
         {/* pelvis: rounded hips so the legs hang from a joint, not from the hem */}
-        <path d="M -29 -8 Q 0 -17 29 -8 L 31 20 Q 0 33 -31 20 Z" fill={look.pantsShade} />
-        <path d="M -25 -4 Q 0 -12 25 -4 L 25 6 Q 0 14 -25 6 Z" fill={look.pants} opacity={0.65} />
+        <path d="M -29 -8 Q 0 -17 29 -8 Q 33 5 29 18 Q 23 25 13 24 Q 7 22 5 15 Q 0 8 -5 15 Q -7 22 -13 24 Q -23 25 -29 18 Q -33 5 -29 -8 Z" fill={look.pants} />
+        <Leg hip={{x: RIG.hipHalf, y: 0}} spec={legNear} look={look} near />
 
         {/* torso */}
-        <g transform={`rotate(${torsoDeg} 0 ${pivotY})`}>
+        <g data-body-part="torso" transform={`rotate(${torsoDeg} 0 ${pivotY})`}>
           {/* fitted tee: narrow sloped shoulders, defined waist, hem flaring over the hips */}
           <path
             d="M -13 -154 C -24 -152 -33 -149 -36 -139 C -38 -124 -35 -104 -31 -88 C -27 -72 -25 -58 -26 -44 C -28 -30 -35 -18 -37 -9 Q 0 6 38 -9 C 36 -18 29 -30 27 -44 C 26 -58 28 -72 32 -88 C 36 -104 39 -124 37 -139 C 34 -149 24 -152 13 -154 Q 0 -146 -13 -154 Z"
@@ -548,9 +459,6 @@ export const Actor: React.FC<{
           ) : null}
         </g>
 
-        {/* near leg in front of torso hem */}
-        <Leg hip={{x: RIG.hipHalf, y: 0}} spec={legNear} look={look} near />
-
         {/* head */}
         <g
           transform={`translate(${neckRoot.x} ${neckRoot.y}) rotate(${torsoDeg * 0.55 + (pose.headNod ?? 0) * 0.45 + (pose.headTilt ?? 0) * 0.5}) translate(0 ${headFromNeck})`}
@@ -560,7 +468,6 @@ export const Actor: React.FC<{
 
         {/* near arm last, in front */}
         <Arm geom={nearArm} look={look} near hand={nearHand} prop={nearProp} />
-        </> : null}
       </g>
     </svg>
   );

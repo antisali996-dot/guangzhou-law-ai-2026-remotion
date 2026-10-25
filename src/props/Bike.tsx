@@ -118,6 +118,7 @@ export const Bike: React.FC<{
   kickstand?: number;
 }> = ({x, groundY, lean = 0, scale = 1, dent = 0, cracked = 0, jolt = 0, spin = 0, opacity = 1, kickstand = 1}) => (
   <svg
+    data-prop="bicycle"
     width={520 * scale}
     height={320 * scale}
     viewBox="-260 -320 520 320"

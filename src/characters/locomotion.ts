@@ -17,7 +17,7 @@ import {RIG} from './Rig';
 
 export type LegAngles = {hip: number; knee: number; foot: number};
 export type LocoSample = {near: LegAngles; far: LegAngles; bob: number; swing: number; hip: number; amp: number};
-export type Strike = {d: number; x: number; leg: 0 | 1; lo?: number; real: boolean};
+export type Strike = {d: number; x: number; leg: 0 | 1; lo?: number; real: boolean; rest?: boolean};
 export type Track = {t0: number; dt: number; samples: LocoSample[]; strikes: Strike[]; strikeTimes: number[]};
 
 const STEP = 105;
@@ -26,11 +26,14 @@ const HEEL = {x: -9, y: 10};
 const MID = {x: 5, y: 10};
 const TOE = {x: 19, y: 9};
 const L_MAX = (RIG.thigh + RIG.shin) * 0.998;
-const REST = [-12, 12]; // ankle dx from own hip joint when standing: [near, far]
+const REST = [18, -18]; // world sole contacts relative to pelvis: near / far
+const HIP_OFFSETS = [RIG.hipHalf, -RIG.hipHalf];
+const HIP_Y = [0, RIG.farHipY];
+const DEPTH_Y = [0, RIG.farHipY]; // far hip and shoe share the street's depth plane
 const H_STAND = GROUND_Y + 5; // standing: knees nearly straight, a few degrees soft
 const H_HI = GROUND_Y + 5.5;
-const H_BOB = 9;
-const LIFT = 15;
+const H_BOB = 3;
+const LIFT = 20;
 const LO_FRAC = 0.1;
 
 const rad = (d: number) => (d * Math.PI) / 180;
@@ -54,8 +57,8 @@ export const planWalk = (Dwant: number, fromStand: boolean, finishAtRest = true)
   const out: Strike[] = [];
   let dI: number;
   if (fromStand) {
-    out.push(mkStrike(-1, REST[0], 0, false, 0.02));
-    out.push(mkStrike(-1, REST[1], 1, false));
+    out.push({...mkStrike(-1, REST[0], 0, false, 0.02),rest:true});
+    out.push({...mkStrike(-1, REST[1], 1, false),rest:true});
     const d1 = 0.45 * STEP;
     out.push(mkStrike(d1, d1 + 0.3 * STEP, 0));
     dI = d1 + 0.85 * STEP;
@@ -116,8 +119,8 @@ const footAt = (all: Strike[], leg: 0 | 1, s: number): Foot => {
   const lo = liftoff(all, cur);
   if (s < lo || !nxt) {
     const span = Math.max(1, Math.min(lo, 1e6) - cur.d);
-    const f = clamp((s - cur.d) / span, 0, 1);
-    const ang = f < 0.15 ? lerp(-14, 0, smooth(f / 0.15)) : f < 0.7 ? 0 : lerp(0, 26, smooth((f - 0.7) / 0.3));
+    const f = clamp((s - (cur.rest?0:cur.d)) / span, 0, 1);
+    const ang = f < 0.15 && !cur.rest ? lerp(-14, 0, smooth(f / 0.15)) : f < 0.7 ? 0 : lerp(0, 26, smooth((f - 0.7) / 0.3));
     return {x: cur.x, lift: 0, ang: nxt ? ang : 0, stance: true};
   }
   const sigma = clamp((s - lo) / Math.max(1, nxt.d - lo), 0, 1);
@@ -125,7 +128,7 @@ const footAt = (all: Strike[], leg: 0 | 1, s: number): Foot => {
   return {
     x: lerp(cur.x, nxt.x, e),
     lift: LIFT * Math.pow(Math.sin(Math.PI * sigma), 0.85),
-    ang: lerp(26, -14, e),
+    ang: lerp(cur.rest && lo<1 ? 0 : 26, -14, e),
     stance: false,
   };
 };
@@ -163,10 +166,10 @@ const smin2 = (a: number, b: number, k: number) => {
 };
 const softMin = (v: number[], k: number) => v.slice(1).reduce((acc, x) => smin2(acc, x, k), v[0]);
 
-const legPose = (foot: Foot, H: number, hipX: number): LegAngles => {
+const legPose = (foot: Foot, H: number, hipX: number, leg: number): LegAngles => {
   const rc = rotPt(contactLocal(foot.ang), foot.ang);
-  const dx = foot.x - hipX - rc.x;
-  const dy = H - foot.lift - rc.y;
+  const dx = foot.x - hipX - HIP_OFFSETS[leg] - rc.x;
+  const dy = H + DEPTH_Y[leg] - HIP_Y[leg] - foot.lift - rc.y;
   const k = solveLeg(dx, dy);
   return {hip: k.hip, knee: k.knee, foot: foot.ang};
 };
@@ -180,12 +183,12 @@ const pelvisHeight = (all: Strike[], s: number, amp: number, feet: Foot[]): numb
   const walk = H_HI - H_BOB * (1 + Math.cos(2 * Math.PI * phi)) * 0.5;
   const target = lerp(H_STAND, walk, amp);
   // each leg limits the pelvis by what it can reach; a lifted foot relaxes its limit smoothly
-  const feas = feet.map((f) => {
+  const feas = feet.map((f,leg) => {
     const rc = rotPt(contactLocal(f.ang), f.ang);
-    const dx = f.x - s - rc.x;
-    return Math.sqrt(Math.max(1, L_MAX * L_MAX - dx * dx)) + rc.y + f.lift;
+    const dx = f.x - s - HIP_OFFSETS[leg] - rc.x;
+    return Math.sqrt(Math.max(1, L_MAX * L_MAX - dx * dx)) + rc.y + f.lift + HIP_Y[leg] - DEPTH_Y[leg];
   });
-  return softMin([target, ...feas.map((x) => x + 1.2)], 4);
+  return softMin([target, ...feas], 4);
 };
 
 /* ------------------------------------------------------------------- tracks */
@@ -218,8 +221,8 @@ export const buildTrack = (spec: TrackSpec): Track => {
     const amp = smooth(v / spec.vRef);
     const feet = [footAt(strikes, 0, s), footAt(strikes, 1, s)];
     const H = pelvisHeight(strikes, s, amp, feet);
-    const near = legPose(feet[0], H, s);
-    const far = legPose(feet[1], H, s);
+    const near = legPose(feet[0], H, s, 0);
+    const far = legPose(feet[1], H, s, 1);
     samples.push({near, far, bob: GROUND_Y - H, swing: clamp((feet[0].x - s) / 60, -1, 1), hip: s, amp});
   }
   const strikeTimes = strikes
@@ -260,14 +263,14 @@ export const standingLegs = (): LocoSample => {
     {x: REST[0], lift: 0, ang: 0, stance: true},
     {x: REST[1], lift: 0, ang: 0, stance: true},
   ];
-  return {near: legPose(feet[0], H_STAND, 0), far: legPose(feet[1], H_STAND, 0), bob: GROUND_Y - H_STAND, swing: 0, hip: 0, amp: 0};
+  return {near: legPose(feet[0], H_STAND, 0, 0), far: legPose(feet[1], H_STAND, 0, 1), bob: GROUND_Y - H_STAND, swing: 0, hip: 0, amp: 0};
 };
 
 /** sole contact position in the figure's world frame, for verification */
 export const soleX = (leg: 0 | 1, L: LegAngles, hipX: number, bob: number) => {
   const jointX = hipX + (leg === 0 ? RIG.hipHalf : -RIG.hipHalf);
   const kx = jointX + Math.sin(rad(L.hip)) * RIG.thigh;
-  const ky = Math.cos(rad(L.hip)) * RIG.thigh;
+  const ky = (leg===0?0:RIG.farHipY) + Math.cos(rad(L.hip)) * RIG.thigh;
   const a2 = rad(L.hip + L.knee);
   const ax = kx + Math.sin(a2) * RIG.shin;
   const ay = ky + Math.cos(a2) * RIG.shin;

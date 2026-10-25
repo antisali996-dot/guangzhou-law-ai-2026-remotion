@@ -1,7 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame} from 'remotion';
 import {FONT, PALETTE} from '../theme';
-import {HEIGHT, WIDTH} from './timeline';
+import {HEIGHT, WIDTH, f} from './timeline';
 import {VO} from './vo';
 import {Street} from '../art/Street';
 import {Bike, BIKE} from '../props/Bike';
@@ -98,9 +98,9 @@ export const SUB_CUES: Cue[] = VO.filter((l) => STORY_IDS.has(l.id)).flatMap((l)
   l.show.map((s) => ({text: s.text, t0: s.t0, t1: s.t1})),
 );
 
-const cueAt = (sec: number): Cue | null => {
+export const subtitleCueAtFrame = (frame: number): Cue | null => {
   for (const c of SUB_CUES) {
-    if (sec >= c.t0 - 0.06 && sec <= c.t1 + 0.06) {
+    if (frame >= f(c.t0) && frame < f(c.t1)) {
       return c;
     }
   }
@@ -110,7 +110,7 @@ const cueAt = (sec: number): Cue | null => {
 export const Subtitles: React.FC = () => {
   const frame = useCurrentFrame();
   const sec = frame / 60;
-  const cue = cueAt(sec);
+  const cue = subtitleCueAtFrame(frame);
   if (!cue || isLegalFrame(frame)) {
     return null;
   }
@@ -145,11 +145,11 @@ export const Subtitles: React.FC = () => {
           opacity: Math.min(fadeIn, fadeOut),
         }}
       >
-        <span
+        <span data-story-part="subtitle"
           style={{
             fontFamily: FONT.sans,
             fontWeight: 400,
-            fontSize: 46,
+            fontSize: 54,
             lineHeight: 1.42,
             letterSpacing: 1.2,
             color: PALETTE.subtitle,

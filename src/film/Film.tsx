@@ -80,7 +80,7 @@ export const Film: React.FC = () => (
 
     <Rain />
     <Subtitles />
-    <CornerLabel text="虚构故事 · 动画示意" opacity={0.42} />
+    <CornerLabel text="AI辅助创作 · 虚构故事" opacity={0.42} />
 
     {/* original score for this film; no continuous noise bed */}
     <Audio src={staticFile('audio/score.wav')} volume={SCORE_REMOTION_VOLUME} />

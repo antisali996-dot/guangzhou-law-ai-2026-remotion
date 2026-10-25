@@ -1,7 +1,7 @@
 import {Easing, interpolate} from 'remotion';
 import type {Pose} from '../characters/Rig';
 import {BIKE, wheelRotationFor} from '../props/Bike';
-import {CONTACT_T} from './cues';
+import {CONTACT_T} from './eventTimes';
 import {GROUND, HIP_Y, BIKE_DX, HIP_REST, ACTOR_SHIFT} from './geometry';
 export {GROUND, HIP_Y, BIKE_DX, HIP_REST, ACTOR_SHIFT} from './geometry';
 import {buildTrack, sampleTrack} from '../characters/locomotion';

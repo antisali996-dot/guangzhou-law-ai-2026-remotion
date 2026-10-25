@@ -181,7 +181,7 @@ export const S08Investigate: React.FC<{start: number}> = ({start}) => {
   ];
 
   if (local < 5.45) return <AbsoluteFill style={{background:'#101E23'}}>
-    <div style={{position:'absolute',left:360,top:84,color:'#EDEADD',fontFamily:'"Noto Sans SC", sans-serif',fontSize:46,fontWeight:600}}>监控与其他证据，锁定抛物者</div>
+    <div style={{position:'absolute',left:360,top:84,color:'#EDEADD',fontFamily:'"Noto Sans SC", sans-serif',fontSize:54,fontWeight:600}}>回到本案：监控与其他证据锁定抛物者</div>
     <div style={{position:'absolute',left:360,top:160,width:1190,height:753,overflow:'hidden',border:'2px solid #77958A'}}>
       <div style={{position:'absolute',width:1920,height:1080,transform:'scale(0.84) translate(-252px,-92px)',transformOrigin:'0 0'}}>
         <CctvStage local={Math.max(0,local-1.5)} zoom={1}/>
@@ -385,7 +385,6 @@ export const S10Confirm: React.FC<{start: number}> = ({start}) => {
         <Cup {...CUP_REST} />
         <TeaStain x={STAIN_X} y={CUP_GROUND_Y + 2} amount={1} scale={0.54} />
         <Actor
-         
           pose={pose}
           x={LEAVE_ACTOR_X}
           y={HIP_Y}
@@ -455,7 +454,7 @@ export const S12Card: React.FC<{start: number}> = ({start}) => {
         </defs>
       </svg>
       <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center'}}>
-        <div style={{position:'absolute',top:150,left:0,right:0,textAlign:'center',fontFamily:'"Noto Sans SC", sans-serif',fontSize:36,color:'#B6CEC0',opacity:first}}>整栋都要赔？先查证据，再依法定责。</div>
+        <div data-story-part="closing-answer" style={{position:'absolute',top:150,left:120,right:120,textAlign:'center',fontFamily:'"Noto Sans SC", sans-serif',fontSize:56,fontWeight:500,color:'#B6CEC0',opacity:first}}>不是整栋一概赔，先查证据再依法定责。</div>
         <div
           style={{
             fontFamily: '"Noto Sans SC", sans-serif',
@@ -496,7 +495,7 @@ export const S12Card: React.FC<{start: number}> = ({start}) => {
             letterSpacing: 10,
           }}
         >
-          《这一栋都要赔》
+          《这一栋，都要赔？》
         </div>
         <div
           style={{

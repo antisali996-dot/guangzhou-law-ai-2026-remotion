@@ -5,12 +5,163 @@ const {test} = require('node:test');
 for (const ext of ['.ts', '.tsx']) {
   require.extensions[ext] = (module, filename) => module._compile(
     ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
-      compilerOptions: {module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX},
+      compilerOptions: {module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true},
     }).outputText, filename);
 }
 const {RIG} = require('../../src/characters/Rig.tsx');
 const {alanAt} = require('../../src/film/alan.ts');
 const {solveTwoBone} = require('../../src/lib/ik.ts');
+
+test('screen quotations retain the verified official paragraphs with all conditions and alternatives', () => {
+  const reference=require('./legal-reference.json');
+  const {CIVIL_QUOTES,COMPENSATION_QUOTES,CRIMINAL_QUOTES}=require('../../src/film/legalFlow.ts');
+  const {VO}=require('../../src/film/vo.ts');
+  assert.equal(VO.find(v=>v.id==='L05').text+CIVIL_QUOTES.join('')+COMPENSATION_QUOTES.join(''),reference.civil.text);
+  assert.equal(CRIMINAL_QUOTES.join(''),reference.criminal.text);
+});
+
+test('story subtitles switch on the rounded cue boundary without retaining the previous phrase', () => {
+  const {SUB_CUES,subtitleCueAtFrame}=require('../../src/film/ui.tsx');
+  const {f}=require('../../src/film/timeline.ts');
+  for(const cue of SUB_CUES) {
+    assert.equal(subtitleCueAtFrame(f(cue.t0)),cue);
+    assert.equal(subtitleCueAtFrame(f(cue.t1)-1),cue);
+    assert.notEqual(subtitleCueAtFrame(f(cue.t1)),cue);
+  }
+  assert.equal(subtitleCueAtFrame(f(25.9)),null);
+  assert.equal(subtitleCueAtFrame(f(78)),null);
+});
+
+test('each planted foot reaches the authored world strike instead of adding a second hip offset', () => {
+  const {WALK_IN}=require('../../src/film/alan.ts');
+  const {LEAVE}=require('../../src/film/leave.ts');
+  const {sampleTrack,soleX}=require('../../src/characters/locomotion.ts');
+  for(const track of [WALK_IN,LEAVE]) {
+    const strikes=track.strikes.filter(s=>s.real && s.d<=track.samples.at(-1).hip);
+    strikes.forEach((strike,i)=>{
+      const pose=sampleTrack(track,track.strikeTimes[i]+.025);
+      const foot=soleX(strike.leg,strike.leg===0?pose.near:pose.far,pose.hip,pose.bob);
+      assert.ok(Math.abs(foot.x-strike.x)<.6,`foot misses planned contact by ${(foot.x-strike.x).toFixed(2)}px`);
+      assert.ok(Math.abs(foot.y-(strike.leg===0?190:184))<.2,'stance sole must stay on its ground plane');
+    });
+  }
+});
+
+test('departure begins with the same flat soles and planted contacts as confirmation', () => {
+  const {standingLegs,soleX}=require('../../src/characters/locomotion.ts');
+  const {leaveAt}=require('../../src/film/leave.ts');
+  const still=standingLegs(), first=leaveAt(0).loco;
+  for(const [i,key] of [[0,'near'],[1,'far']]) {
+    assert.equal(first[key].foot,still[key].foot,'shoe must not snap to toe-off across the cut');
+    const a=soleX(i,still[key],0,still.bob),b=soleX(i,first[key],0,first.bob);
+    assert.ok(Math.hypot(a.x-b.x,a.y-b.y)<.1);
+  }
+});
+
+test('entry footsteps follow the actual landing times instead of a separate guessed rhythm', () => {
+  const {WALK_IN}=require('../../src/film/alan.ts');
+  const {SFX_CUES}=require('../../src/film/cues.ts');
+  const sounds=SFX_CUES.filter(c=>c.file==='sfx-step.wav' && c.at<10);
+  assert.equal(sounds.length,WALK_IN.strikeTimes.length);
+  sounds.forEach((s,i)=>assert.ok(Math.abs(s.at-WALK_IN.strikeTimes[i])<1/60));
+});
+
+test('entry and departure keep a support foot grounded without sliding flat soles', () => {
+  const {WALK_IN}=require('../../src/film/alan.ts');
+  const {LEAVE}=require('../../src/film/leave.ts');
+  const {sampleTrack,soleX}=require('../../src/characters/locomotion.ts');
+  for(const track of [WALK_IN,LEAVE]) {
+    let previous;
+    const duration=(track.samples.length-1)*track.dt;
+    for(let f=0;f<=Math.floor(duration*60);f++) {
+      const state=sampleTrack(track,track.t0+f/60);
+      const feet=[state.near,state.far].map((leg,i)=>({...soleX(i,leg,state.hip,state.bob),angle:leg.foot,ground:i===0?190:184}));
+      assert.ok(feet.every(p=>p.y<=p.ground+.05),'a sole sinks through the pavement');
+      assert.ok(feet.some(p=>Math.abs(p.y-p.ground)<.05),'both feet lose ground support');
+      if(previous) feet.forEach((p,i)=>{
+        const old=previous[i];
+        if(Math.abs(p.angle)<.001 && Math.abs(old.angle)<.001 && Math.abs(p.y-p.ground)<.01 && Math.abs(old.y-old.ground)<.01) {
+          assert.ok(Math.abs(p.x-old.x)<.03,'a planted flat foot skates');
+        }
+      });
+      previous=feet;
+    }
+  }
+});
+
+test('trousers keep their bone lengths, a covered hip root and short knee rounding', () => {
+  const {legGeometryFor}=require('../../src/characters/Rig.tsx');
+  for(let frame=0;frame<=510;frame+=3) {
+    const pose=alanAt(frame/60).pose;
+    for(const [hip,spec] of [[{x:RIG.hipHalf,y:0},pose.legNear],[{x:-RIG.hipHalf,y:RIG.farHipY},pose.legFar]]) {
+      const g=legGeometryFor(hip,spec);
+      assert.ok(!/NaN|Infinity/.test(g.outline));
+      assert.ok(Math.abs(Math.hypot(g.knee.x-hip.x,g.knee.y-hip.y)-RIG.thigh)<1e-8);
+      assert.ok(Math.abs(Math.hypot(g.ankle.x-g.knee.x,g.ankle.y-g.knee.y)-RIG.shin)<1e-8);
+      const knees=[...g.outline.matchAll(/Q ([^LQCZ]+)/g)].map(m=>m[1].trim().split(/\s+/).map(Number));
+      for(const fillet of [knees[0],knees[2]]) {
+        assert.ok(Math.abs(Math.hypot(fillet[2]-fillet[0],fillet[3]-fillet[1])-10)<1e-8,'rounding must stay local to the knee');
+      }
+      const cap=g.outline.match(/C ([^Z]+)/)[1].trim().split(/\s+/).map(Number);
+      assert.ok(Math.min(cap[1],cap[3])<hip.y-6,'rounded root must extend above the exposed hip joint');
+    }
+  }
+});
+
+test('shirt covers the trouser roots and both legs stay in one complete person', () => {
+  const React=require('react'),{renderToStaticMarkup}=require('react-dom/server');
+  const {Actor}=require('../../src/characters/Rig.tsx');
+  const all=renderToStaticMarkup(React.createElement(Actor,{x:0,y:0,pose:alanAt(8.1).pose}));
+  assert.ok(all.indexOf('data-body-part="near-leg"')<all.indexOf('data-body-part="torso"'));
+  for(const leg of ['far-leg','near-leg']) assert.ok(all.includes(`data-body-part="${leg}"`));
+});
+
+test('walking beside the bicycle keeps both legs on the same side in every story scene', () => {
+  const {execFileSync}=require('node:child_process');
+  const path=require('node:path');
+  const result=execFileSync(process.execPath,[path.join(__dirname,'push-side-review.cjs'),'--check'],{encoding:'utf8'});
+  assert.ok(result.includes('11 real Film scenes'));
+});
+
+test('face controls keep expression overshoot out of the new head geometry', () => {
+  const {faceState}=require('../../src/characters/face.ts');
+  for(const surprise of [-4,0,.5,1,3]) for(const mood of [-3,-.75,0,.5,3]) for(const blink of [-1,0,.5,1,2]) {
+    const a=faceState({surprise,mood,blink,yaw:3});
+    assert.ok(Object.values(a).every(Number.isFinite));
+    assert.ok(a.startle>=0 && a.startle<=1);
+    assert.ok(a.eyeOpen>=.025 && a.eyeOpen<=1);
+    assert.ok(a.browLift>=0 && a.browLift<=2.1);
+    assert.ok(Math.abs(a.mouthCurve)<=.7);
+    assert.ok(Math.abs(a.shift)<=2.6);
+  }
+});
+
+test('drawn brows stay above open eyes throughout the concern and startle range', () => {
+  const React=require('react'),{renderToStaticMarkup}=require('react-dom/server');
+  const {Head}=require('../../src/characters/Head.tsx');
+  const {ALAN_LOOK}=require('../../src/characters/Rig.tsx');
+  const numbers=s=>s.match(/-?\d*\.?\d+/g).map(Number);
+  for(const surprise of [0,.5,1,-3.8]) for(const mood of [-1,0,1]) {
+    const svg=renderToStaticMarkup(React.createElement('svg',null,React.createElement(Head,{yaw:.5,nod:0,tilt:0,ponytail:0,look:ALAN_LOOK,surprise,mood})));
+    assert.ok(!/NaN|Infinity/.test(svg));
+    const browGroup=svg.match(/data-face-part="brows"[^>]*>([\s\S]*?)<\/g>/)[1];
+    const brows=[...browGroup.matchAll(/d="([^"]+)"/g)].map(m=>numbers(m[1]));
+    const browBottom=Math.max(...brows.flatMap(n=>[n[1],n[1]+n[3],n[1]+n[5]]))+.675;
+    // Conservative control-point bound, rather than assuming a particular resting eyebrow shape.
+    const eyeTop=-9.5-Math.max(0,Math.min(1,surprise));
+    assert.ok(browBottom<eyeTop+.7,`brow/lid clearance lost: ${surprise}, ${mood}`);
+  }
+});
+
+test('new head eye masks remain distinct when several characters share a static frame', () => {
+  const React=require('react'),{renderToStaticMarkup}=require('react-dom/server');
+  const {Head}=require('../../src/characters/Head.tsx');
+  const {ALAN_LOOK}=require('../../src/characters/Rig.tsx');
+  const svg=renderToStaticMarkup(React.createElement('svg',null,[0,1,2].map(i=>React.createElement(Head,{key:i,yaw:i*.2,nod:0,tilt:0,ponytail:0,look:ALAN_LOOK,blink:i/2}))));
+  const ids=[...svg.matchAll(/<clipPath id="([^"]+)"/g)].map(m=>m[1]);
+  assert.equal(ids.length,6);assert.equal(new Set(ids).size,6);
+  for(const id of ids) assert.ok(svg.includes(`url(#${id})`));
+});
 
 test('foreground rain stays outside phone interfaces, evidence desks and reading scenes', () => {
   const {foregroundRainAt}=require('../../src/film/cameraAngles.ts');

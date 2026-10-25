@@ -16,7 +16,7 @@ export const LawFocus: React.FC<{
   const accent = criminal ? '#A24937' : '#32756E';
   const headline = headings[Math.min(active, headings.length - 1)];
   return (
-    <div style={{position: 'absolute', left: 88, top: 162, width: 1050, height: 744,
+    <div data-law-part="quotation" style={{position: 'absolute', left: 88, top: 162, width: 1050, height: 744,
       background: '#EFEDE4', color: ink, boxShadow: '0 12px 40px rgba(4,12,15,0.23)',
       border: '1px solid rgba(200,207,195,0.7)', overflow: 'hidden'}}>
       <Img src={staticFile('film-v18/paper-texture.png')}
@@ -37,13 +37,13 @@ export const LawFocus: React.FC<{
         ))}
       </div>
       <div style={{position: 'absolute', left: 54, top: 356, width: 72 + 610 * enter, height: 3, background: accent, opacity: 0.55}} />
-      <div style={{position: 'absolute', left: 54, top: 390, fontFamily: FONT.sans, fontSize: 23,
+      <div style={{position: 'absolute', left: 54, top: 390, fontFamily: FONT.sans, fontSize: 26,
         letterSpacing: 2, color: '#6B7A74'}}>法条原文 · 节选</div>
-      <div style={{position: 'absolute', left: 54, top: 438, right: 54, fontFamily: FONT.serif,
-        fontSize: 41, fontWeight: 500, lineHeight: 1.6, letterSpacing: 0.6, color: ink,
+      <div data-law-part="quote-text" style={{position: 'absolute', left: 54, top: 438, right: 54, fontFamily: FONT.serif,
+        fontSize: 52, fontWeight: 500, lineHeight: 1.5, letterSpacing: 0.6, color: ink,
         opacity, transform: `translateY(${10 * (1 - enter)}px)`}}>{lines[active]}</div>
-      <div style={{position: 'absolute', left: 54, bottom: 68, right: 35, fontFamily: FONT.sans,
-        fontSize: 26, color: '#566B65', lineHeight: 1.4}}>{cite}</div>
+      <div data-law-part="citation" style={{position: 'absolute', left: 54, bottom: 68, right: 35, fontFamily: FONT.sans,
+        fontSize: 28, color: '#566B65', lineHeight: 1.4}}>{cite}</div>
       <div style={{position: 'absolute', left: 54, right: 54, bottom: 35, display: 'flex', gap: 12}}>
         {lines.map((_, i) => <div key={i} style={{height: 5, flex: 1,
           background: i <= active ? accent : '#CED4C9', opacity: i === active ? 1 : 0.45}} />)}

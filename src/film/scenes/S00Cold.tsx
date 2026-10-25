@@ -29,7 +29,7 @@ export const S00Cold: React.FC<{start: number}> = ({start}) => {
       <div style={{position: 'absolute', left: 126, top: 706, color: '#D5DFD5', fontFamily: FONT.serif,
         fontSize: 40, lineHeight: 1.5, opacity: caption ? 1 : 0}}>杯子从楼上飞下，<br />责任该由谁承担？</div>
       <div style={{position: 'absolute', left: 126, bottom: 93, fontFamily: FONT.sans, fontSize: 25,
-        color: '#92ADA7', letterSpacing: 2, opacity: first}}>从一只受损车筐说起</div>
+        color: '#92ADA7', letterSpacing: 2, opacity: first}}>沿着证据，找到该承担责任的人</div>
     </AbsoluteFill>
   );
 };

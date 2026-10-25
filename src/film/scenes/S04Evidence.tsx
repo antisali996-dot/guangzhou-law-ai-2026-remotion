@@ -47,7 +47,6 @@ export const S04Evidence: React.FC<{start: number}> = ({start}) => {
         <TeaStain x={STAIN_X} y={CUP_GROUND_Y + 2} amount={1} scale={0.54} />
         {phase === 'a' ? (
           <Actor
-           
             pose={pose}
             x={HIP_REST}
             y={HIP_Y}

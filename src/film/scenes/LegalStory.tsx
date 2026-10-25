@@ -12,17 +12,17 @@ const Backdrop: React.FC<{criminal?:boolean}> = ({criminal=false}) => <>
 </>;
 
 /** One legible original clause, supplying the legal narration captions. */
-const Quotation: React.FC<{text:string;cite:string;active:number;count:number;criminal?:boolean}> = ({text,cite,active,count,criminal=false}) => <div style={{position:'absolute',left:128,top:738,width:1664,height:232,background:'#ECEADF',color:'#263D3F',boxShadow:'0 8px 24px #07131855'}}>
+export const LegalQuotation: React.FC<{text:string;cite:string;active:number;count:number;criminal?:boolean}> = ({text,cite,active,count,criminal=false}) => <div data-law-part="quotation" style={{position:'absolute',left:128,top:738,width:1664,height:232,background:'#ECEADF',color:'#263D3F',boxShadow:'0 8px 24px #07131855'}}>
   <div style={{position:'absolute',left:0,top:0,bottom:0,width:5,background:criminal?'#A75B46':'#3D7E70'}}/>
   <div style={{position:'absolute',left:30,top:17,fontFamily:FONT.sans,fontSize:23,color:'#61776E',letterSpacing:2}}>法条原文 · 节选</div>
-  <div style={{position:'absolute',left:30,right:30,top:57,fontFamily:FONT.serif,fontSize:text.length>31?38:43,lineHeight:1.55,fontWeight:500}}>{text}</div>
-  <div style={{position:'absolute',left:30,bottom:20,fontFamily:FONT.sans,fontSize:25,color:'#506960'}}>{cite}</div>
+  <div data-law-part="quote-text" style={{position:'absolute',left:30,right:30,top:57,fontFamily:FONT.serif,fontSize:text.length>28?52:56,lineHeight:1.4,fontWeight:500}}>{text}</div>
+  <div data-law-part="citation" style={{position:'absolute',left:30,bottom:20,fontFamily:FONT.sans,fontSize:28,color:'#506960'}}>{cite}</div>
   <div style={{position:'absolute',right:32,bottom:24,display:'flex',gap:9}}>{Array.from({length:count},(_,i)=><div key={i} style={{width:i===active?44:14,height:4,background:i===active?'#467D70':'#A6B8AA'}}/>)}</div>
 </div>;
 
 const Chapter: React.FC<{label:string;title:string;note?:string}> = ({label,title,note}) => <>
-  <div style={{position:'absolute',left:132,top:105,fontFamily:FONT.sans,fontSize:27,color:GREEN,letterSpacing:3}}>{label}</div>
-  <div style={{position:'absolute',left:128,top:155,fontFamily:FONT.sans,fontSize:66,fontWeight:700,color:CREAM,letterSpacing:1}}>{title}</div>
+  <div data-law-part="condition" style={{position:'absolute',left:132,top:96,fontFamily:FONT.sans,fontSize:36,lineHeight:1.2,color:GREEN,letterSpacing:2}}>{label}</div>
+  <div data-law-part="headline" style={{position:'absolute',left:128,top:155,fontFamily:FONT.sans,fontSize:66,fontWeight:700,color:CREAM,letterSpacing:1}}>{title}</div>
   {note?<div style={{position:'absolute',left:132,top:245,fontFamily:FONT.sans,fontSize:28,color:'#B4C6BC'}}>{note}</div>:null}
 </>;
 
@@ -42,7 +42,7 @@ export const CivilResponsibility: React.FC<{start:number}> = ({start}) => {
       <div style={{fontSize:70,fontWeight:700,marginTop:30,lineHeight:1.28}}>{active===0?<>损害事实<br/><span style={{color:AMBER}}>有证据可查</span></>:<>侵权责任<br/><span style={{color:AMBER}}>依法承担</span></>}</div>
       <svg width={580} height={80}><path d="M8 45h520m-18-14 18 14-18 14" fill="none" stroke={GREEN} strokeWidth={3} pathLength={1} strokeDasharray={1} strokeDashoffset={1-enter}/></svg>
     </div>
-    <Quotation text={CIVIL_QUOTES[active]} cite="《民法典》第1254条第一款（节选）" active={active} count={2}/>
+    <LegalQuotation text={CIVIL_QUOTES[active]} cite="《民法典》第1254条第一款（节选）" active={active} count={2}/>
   </AbsoluteFill>;
 };
 
@@ -99,16 +99,16 @@ export const ConditionalCompensation: React.FC<{start:number}> = ({start}) => {
   const outcome=['仍难确定侵权人','依法排除','给予补偿','有权追偿'][phase];
   return <AbsoluteFill>
     <Backdrop/>
-    <Chapter label="条件分支 · 经调查仍难确定侵权人时" title="找不到谁扔的，也不能整栋一概收钱"/>
+    <Chapter label="假设分支 · 经调查仍难确定侵权人时" title="找不到谁扔的，也不能整栋一概收钱"/>
     <BuildingFlow t={t} phase={phase}/>
-    <div style={{position:'absolute',left:1200,top:315,width:590,fontFamily:FONT.sans,color:CREAM}}>
-      <div style={{fontSize:heading.length>8?48:57,fontWeight:600,lineHeight:1.35}}>{heading}</div>
-      <div style={{fontSize:outcome.length>7?55:78,fontWeight:700,color:phase===3?AMBER:GREEN,marginTop:24}}>{outcome}</div>
-      <div style={{width:90,height:3,background:GREEN,marginTop:34}}/>
-      <div style={{fontSize:27,color:'#BBCEC2',lineHeight:1.6,marginTop:22}}>{['先调查，再判断补偿责任。','不是所有建筑物使用人都要补偿。','补偿范围依法确定。','补偿人可向实际侵权人追偿。'][phase]}</div>
-      <div style={{display:'flex',gap:20,marginTop:42}}>{COMPENSATION_MARKS.map((_,i)=><span key={i} style={{fontSize:26,color:i===phase?CREAM:'#65837A',borderBottom:i===phase?'2px solid #9CC7B2':'2px solid transparent',paddingBottom:7}}>{['调查','排除','补偿','追偿'][i]}</span>)}</div>
+    <div data-law-part="branch-summary" style={{position:'absolute',left:1200,top:302,width:590,height:390,fontFamily:FONT.sans,color:CREAM}}>
+      <div style={{position:'absolute',top:0,fontSize:54,fontWeight:600,lineHeight:1.2}}>{heading}</div>
+      <div style={{position:'absolute',top:92,fontSize:72,lineHeight:1.2,fontWeight:700,color:phase===3?AMBER:GREEN}}>{outcome}</div>
+      <div style={{position:'absolute',top:188,width:90,height:3,background:GREEN}}/>
+      <div style={{position:'absolute',top:212,fontSize:34,color:'#BBCEC2',lineHeight:1.45}}>{['先调查，再判断补偿责任。','不是所有建筑物使用人都要补偿。','补偿范围须依法调查确定。','补偿人可向实际侵权人追偿。'][phase]}</div>
+      <div style={{position:'absolute',top:332,display:'flex',gap:24}}>{COMPENSATION_MARKS.map((_,i)=><span key={i} style={{fontSize:30,color:i===phase?CREAM:'#65837A',borderBottom:i===phase?'2px solid #9CC7B2':'2px solid transparent',paddingBottom:7}}>{['调查','排除','补偿','追偿'][i]}</span>)}</div>
     </div>
-    <Quotation text={COMPENSATION_QUOTES[phase]} cite="《民法典》第1254条第一款（节选）" active={phase} count={4}/>
+    <LegalQuotation text={COMPENSATION_QUOTES[phase]} cite="《民法典》第1254条第一款（节选）" active={phase} count={4}/>
   </AbsoluteFill>;
 };
 
@@ -117,19 +117,19 @@ export const CriminalBoundary: React.FC<{start:number}> = ({start}) => {
   const enter=ip(t,[CRIMINAL_MARKS[phase],CRIMINAL_MARKS[phase]+.45],[0,1],smooth);
   return <AbsoluteFill>
     <Backdrop criminal/>
-    <div style={{position:'absolute',left:132,top:108,color:RED,fontFamily:FONT.sans,fontSize:30,letterSpacing:2}}>刑事责任提示 · 适用前提：情节严重 · 是否构成犯罪须依法认定</div>
-    <div style={{position:'absolute',left:128,top:172,fontFamily:FONT.sans,fontSize:67,color:CREAM,fontWeight:700}}>高空抛物，还可能触及刑责</div>
+    <div data-law-part="condition" style={{position:'absolute',left:132,top:100,color:RED,fontFamily:FONT.sans,fontSize:36,letterSpacing:1.5}}>刑事责任提示 · 适用前提：<span style={{fontSize:42,fontWeight:600,color:AMBER}}>情节严重</span> · 须依法认定</div>
+    <div data-law-part="headline" style={{position:'absolute',left:128,top:172,fontFamily:FONT.sans,fontSize:67,color:CREAM,fontWeight:700}}>高空抛物，还可能触及刑责</div>
     <div style={{position:'absolute',left:128,top:305,width:1664,height:374,opacity:.5+.5*enter,transform:`translateY(${12*(1-enter)}px)`,fontFamily:FONT.sans,color:CREAM}}>
       {phase===0?<>
         <svg width={490} height={360}><path d="M245 35 425 325H65Z" fill="#382D2B" stroke={RED} strokeWidth={6}/><path d="M245 129v98" stroke={RED} strokeWidth={10} strokeLinecap="round"/><circle cx={245} cy={272} r={7} fill={RED}/></svg>
         <div style={{position:'absolute',left:620,top:35,fontSize:112,fontWeight:700,color:AMBER}}>情节严重</div>
         <div style={{position:'absolute',left:624,top:211,fontSize:36,color:'#D0C8B6'}}>须结合具体事实与证据依法认定</div>
       </>:phase===1?<>
-        {['有期徒刑','拘役','管制'].map((label,i)=><div key={label} style={{position:'absolute',left:i*570,top:24,width:480,textAlign:'center'}}>
+        {['有期徒刑','拘役','管制'].map((label,i)=><div data-penalty={label} key={label} style={{position:'absolute',left:i*570,top:24,width:480,textAlign:'center'}}>
           <div style={{fontSize:31,color:'#BDBEAF',letterSpacing:4}}>依法适用</div>
-          <div style={{fontSize:i===0?80:98,fontWeight:700,color:AMBER,marginTop:38}}>{i===0?'一年以下':label}</div>
-          <div style={{fontSize:i===0?41:30,marginTop:24,color:i===0?CREAM:'#BCBFAF'}}>{i===0?label:'刑法规定的刑罚种类'}</div>
-          {i<2?<div style={{position:'absolute',left:495,top:140,fontSize:28,color:'#BFC8B9'}}>或</div>:null}
+          <div style={{fontSize:80,fontWeight:700,color:AMBER,marginTop:38}}>{label}</div>
+          <div style={{fontSize:i===0?52:30,marginTop:24,color:i===0?CREAM:'#BCBFAF'}}>{i===0?'一年以下':'刑法规定的刑罚种类'}</div>
+          {i<2?<div data-law-part="alternative" style={{position:'absolute',left:493,top:128,fontSize:54,color:'#D1D8CB'}}>或</div>:null}
         </div>)}
       </>:<>
         <div style={{position:'absolute',left:160,top:80,fontSize:58}}>并处或者单处</div>
@@ -137,6 +137,6 @@ export const CriminalBoundary: React.FC<{start:number}> = ({start}) => {
         <div style={{position:'absolute',left:805,top:232,fontSize:30,color:'#D3CCB8'}}>与前述刑罚规则结合理解</div>
       </>}
     </div>
-    <Quotation text={CRIMINAL_QUOTES[phase]} cite="《刑法》第291条之二第一款" active={phase} count={3} criminal/>
+    <LegalQuotation text={CRIMINAL_QUOTES[phase]} cite="《刑法》第291条之二第一款" active={phase} count={3} criminal/>
   </AbsoluteFill>;
 };

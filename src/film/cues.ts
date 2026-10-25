@@ -4,21 +4,18 @@
  * so the studio preview and the delivered mix cannot drift apart again.
  */
 import {LEAVE, LEAVE_START, LEAVE_WALK_DELAY} from './leave';
+import {WALK_IN} from './alan';
+import {CONTACT_T} from './eventTimes';
+export {CONTACT_T} from './eventTimes';
 
 export const SCORE_REMOTION_VOLUME = 0.4;
-
-/** Frame-accurate moment the cup strikes the basket rim. */
-export const CONTACT_T = 10.7667;
 
 export type SfxCue = {at: number; file: string; v: number};
 
 const step = (at: number, v: number): SfxCue => ({at, file: 'sfx-step.wav', v});
 
 export const SFX_CUES: SfxCue[] = [
-  step(6.27, 0.42),
-  step(6.76, 0.40),
-  step(7.26, 0.36),
-  step(7.78, 0.26),
+  ...WALK_IN.strikeTimes.map((at,i)=>step(at,Math.max(.26,.42-i*.04))),
   {at: 7.30, file: 'sfx-wheel.wav', v: 0.46},
   // the three collision sounds are all derived from one contact time
   {at: CONTACT_T, file: 'sfx-impact.wav', v: 0.86},
