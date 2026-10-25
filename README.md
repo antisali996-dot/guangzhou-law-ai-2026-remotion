@@ -1,15 +1,19 @@
-# 《这一栋都要赔》Remotion 普法动画
+# 《这一栋，都要赔？》Remotion 普法动画
 
 广州骑楼街场景的 AI 辅助普法二维动画工程。
 Remotion 4.0.537 + React 19；1920×1080 / 60fps / 84 秒（5040 帧）。
 
-当前本地参赛方向优化版：`out/这一栋都要赔_二维动画_1080P60_v21.mp4`。[v21 复审与验收](docs/V21-VERIFICATION.md) · [设计与五维复审记录](docs/V21-REVIEW-PLAN.md)。保留两条法条原文，强化责任分支、监控证据与片尾回应。
+当前完整审看版：**v23**，`out/这一栋都要赔_二维动画_1080P60_v23.mp4`，84秒、1080p60。已纠正v22推车人物双腿分跨车架的遮挡错误，统一人物站在自行车同一侧。[修正与实际成片验证](docs/V23-SAME-SIDE.md) · [五维审查](docs/V22-PREFLIGHT.md)。
 
-本次重点段预览：`out/法条与取证优化预览_v21.mp4`（38.7–59.5 秒，960×540）。历史版本均保留：[v20 皱眉修正](docs/V20-VERIFICATION.md) · [v19 多机位](docs/V19-DESIGN.md) · [v18 优化](docs/V18-DESIGN.md)。
+下载成片、SHA256校验及实际修改对照：[v23发布页](https://github.com/antisali996-dot/guangzhou-law-ai-2026-remotion/releases/tag/film-v23)。仓库保持私有，访问和下载需要仓库权限。
+
+上一版本地成片：`out/这一栋都要赔_二维动画_1080P60_v21.mp4`。[v21复审与验收](docs/V21-VERIFICATION.md) · [设计与五维复审](docs/V21-REVIEW-PLAN.md)。
+
+历史重点段预览：`out/法条与取证优化预览_v21.mp4`（38.7–59.5秒，960×540）。[v20皱眉修正](docs/V20-VERIFICATION.md) · [v19多机位](docs/V19-DESIGN.md) · [v18优化](docs/V18-DESIGN.md)。
 
 已归档的 v16 完整成片和 22.5 秒修复预览见 [film-v16 发布页](https://github.com/antisali996-dot/guangzhou-law-ai-2026-remotion/releases/tag/film-v16)。[v16 验收记录](docs/V16-VERIFICATION.md)。
 
-![v21 全片关键帧](docs/preview-v21.jpg)
+![v23实际成片关键帧](docs/preview-v23.jpg)
 
 ## 获取与运行（Windows）
 
@@ -26,7 +30,7 @@ npm run studio
 Chrome 默认位置在 `remotion.config.ts`；更换电脑时请按本机安装路径调整 `Config.setBrowserExecutable(...)`。
 音频工具的 FFmpeg / ffprobe 路径位于 `work/audio/timeline_audio.py`，默认是 `D:\dshws\tools\ffmpeg\bin`，请按本机安装位置调整 `FF` / `PROBE` 后再混音、验收或导出。
 
-仓库包含预览和渲染所需的本地字体、旁白、配乐、音效和已生成的美术资源；无需在线生成素材。`node_modules`、渲染缓存、调试备份和历史视频不进入 Git。v21 当前为本地待审版本，未上传发布页；已发布的历史版本可从对应发布页下载并放回 `out/`。
+仓库包含预览和渲染所需的本地字体、旁白、配乐、音效和已生成的美术资源；无需在线生成素材。`node_modules`、渲染缓存、调试备份和视频不进入 Git；成片通过Release附件提供。v23附件名为 `film-v23-1080p60.mp4`，如需使用工程中的成片核查命令，将其保存为 `out/这一栋都要赔_二维动画_1080P60_v23.mp4`。v22保留为本地问题对照。
 素材来源及字体许可见 [THIRD_PARTY.md](THIRD_PARTY.md)。
 
 ## 维护入口
@@ -60,7 +64,7 @@ npm test
 导出下一版完整成片（指定一个尚不存在的文件名）：
 
 ```powershell
-npm run render:final -- --output "out/这一栋都要赔_二维动画_1080P60_v22.mp4"
+npm run render:final -- --output "out/这一栋都要赔_二维动画_1080P60_v24.mp4"
 ```
 
 此命令执行：检查 → 按源码混音 → 28 条声音对时 → 两遍响度归一 → Remotion 全尺寸渲染 → 封装 → 检查实际交付文件。
